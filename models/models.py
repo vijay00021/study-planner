@@ -23,6 +23,17 @@ class Subject(db.Model):
     priority = db.Column(db.String(50))
     tasks = db.relationship('Task', backref='subject', lazy=True)
 
+    @property
+    def days_left(self):
+        if not self.deadline:
+            return None
+        try:
+            deadline_date = datetime.strptime(self.deadline, '%Y-%m-%d').date()
+            today = datetime.now().date()
+            return (deadline_date - today).days
+        except Exception:
+            return None
+
 # TASK MODEL
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
