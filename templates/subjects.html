@@ -19,7 +19,8 @@
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div class="stat-icon purple"><i class="fa-solid fa-book"></i></div>
-                <div class="dropdown">
+                <div class="d-flex gap-2">
+                    <a href="#" class="text-primary" data-modal-target="#editSubjectModal{{ subject.id }}" title="Edit Subject"><i class="fa-solid fa-pen-to-square"></i></a>
                     <a href="{{ url_for('delete_subject', id=subject.id) }}" class="text-danger" title="Delete Subject"><i class="fa-solid fa-trash"></i></a>
                 </div>
             </div>
@@ -33,6 +34,35 @@
                     <span class="status-badge {{ subject.priority|lower }}">{{ subject.priority }}</span>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Edit Subject Modal -->
+    <div class="modal" id="editSubjectModal{{ subject.id }}">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Subject</h3>
+                <i class="fa-solid fa-xmark close-btn"></i>
+            </div>
+            <form action="{{ url_for('edit_subject', id=subject.id) }}" method="POST">
+                <div class="form-group">
+                    <label class="form-label">Subject Name</label>
+                    <input type="text" name="subject_name" class="form-control" value="{{ subject.subject_name }}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Deadline</label>
+                    <input type="date" name="deadline" class="form-control" value="{{ subject.deadline }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Priority</label>
+                    <select name="priority" class="form-control">
+                        <option value="High" {% if subject.priority == 'High' %}selected{% endif %}>High</option>
+                        <option value="Medium" {% if subject.priority == 'Medium' %}selected{% endif %}>Medium</option>
+                        <option value="Low" {% if subject.priority == 'Low' %}selected{% endif %}>Low</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Update Subject</button>
+            </form>
         </div>
     </div>
     {% else %}

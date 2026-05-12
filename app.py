@@ -361,6 +361,17 @@ def add_subject():
     db.session.commit()
     return redirect(request.referrer or url_for('home'))
 
+@app.route('/edit-subject/<int:id>', methods=['POST'])
+@login_required
+def edit_subject(id):
+    subject = Subject.query.filter_by(id=id, user_id=session['user_id']).first()
+    if subject:
+        subject.subject_name = request.form.get('subject_name', subject.subject_name)
+        subject.deadline = request.form.get('deadline', subject.deadline)
+        subject.priority = request.form.get('priority', subject.priority)
+        db.session.commit()
+    return redirect(request.referrer or url_for('subjects_page'))
+
 @app.route('/delete-subject/<int:id>')
 @login_required
 def delete_subject(id):
