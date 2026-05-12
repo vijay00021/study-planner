@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Edit Subject</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div class="edit-container">
+
+    <h1>Edit Subject</h1>
+
+    <form
+        action="/update-subject/{{ subject.id }}"
+        method="POST"
+    >
+
+        <input
+            type="text"
+            name="subject_name"
+            value="{{ subject.subject_name }}"
+            required
+        >
+
+        <input
+            type="text"
+            name="deadline"
+            value="{{ subject.deadline }}"
+            required
+        >
+
+        <select name="priority">
+
+            <option
+                {% if subject.priority == 'High' %}
+                selected
+                {% endif %}
+            >
+                High
+            </option>
+
+            <option
+                {% if subject.priority == 'Medium' %}
+                selected
+                {% endif %}
+            >
+                Medium
+            </option>
+
+            <option
+                {% if subject.priority == 'Low' %}
+                selected
+                {% endif %}
+            >
+                Low
+            </option>
+
+        </select>
+
+        <button type="submit">
+            Update Subject
+        </button>
+
+    </form>
+
+</div>
+
+</body>
+</html>

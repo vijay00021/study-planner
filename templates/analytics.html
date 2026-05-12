@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Analytics Overview</h1>
+        <p class="page-subtitle">Track your study performance and history</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <span>Study Hours (Last 7 Days)</span>
+    </div>
+    <div class="card-body" style="height: 300px;">
+        <canvas id="activityChart"></canvas>
+    </div>
+</div>
+
+<script>
+    window.chartLabels = {{ chart_labels | tojson }};
+    window.chartData = {{ chart_data | tojson }};
+</script>
+{% endblock %}

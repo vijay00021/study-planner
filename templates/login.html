@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Study Planner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <div class="logo"><i class="fa-solid fa-layer-group"></i></div>
+            <h2>Welcome Back</h2>
+            <p>Enter your credentials to access your dashboard</p>
+            
+            {% if error %}
+            <div style="background-color: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 0.75rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; font-size: 0.875rem;">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form action="{{ url_for('login_page') }}" method="POST">
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" name="email" class="form-control" required placeholder="name@example.com" value="{{ email if email else '' }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" style="display: flex; justify-content: space-between;">
+                        Password
+                        <a href="{{ url_for('forgot_password') }}" style="color: var(--primary); font-size: 0.75rem;">Forgot Password?</a>
+                    </label>
+                    <input type="password" name="password" class="form-control" required placeholder="••••••••">
+                </div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem;">
+                    <input type="checkbox" name="remember" id="remember" style="width: auto; margin: 0; accent-color: var(--primary);">
+                    <label for="remember" style="margin: 0; font-size: 0.875rem; color: var(--text-main); font-weight: 500; cursor: pointer;">Remember me</label>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+            </form>
+
+            <div style="margin-top: 2rem; font-size: 0.875rem;">
+                Don't have an account? <a href="{{ url_for('signup_page') }}" style="color: var(--primary); font-weight: 600;">Sign up</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

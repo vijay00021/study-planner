@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dashboard{% endblock %} - Study Planner</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- FullCalendar -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <a href="{{ url_for('home') }}" class="sidebar-header" style="text-decoration: none;">
+            <i class="fa-solid fa-layer-group"></i>
+            <span>StudyPlan</span>
+        </a>
+        
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('home') }}" class="nav-item {% if active_page == 'dashboard' %}active{% endif %}">
+                <i class="fa-solid fa-house"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('subjects_page') }}" class="nav-item {% if active_page == 'subjects' %}active{% endif %}">
+                <i class="fa-solid fa-book-open"></i>
+                <span>Subjects</span>
+            </a>
+            <a href="{{ url_for('tasks_page') }}" class="nav-item {% if active_page == 'tasks' %}active{% endif %}">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Tasks</span>
+            </a>
+            <a href="{{ url_for('schedule_page') }}" class="nav-item {% if active_page == 'schedule' %}active{% endif %}">
+                <i class="fa-regular fa-calendar"></i>
+                <span>Schedule</span>
+            </a>
+            <a href="{{ url_for('timer_page') }}" class="nav-item {% if active_page == 'timer' %}active{% endif %}">
+                <i class="fa-solid fa-stopwatch"></i>
+                <span>Timer</span>
+            </a>
+            <a href="{{ url_for('analytics_page') }}" class="nav-item {% if active_page == 'analytics' %}active{% endif %}">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span>Analytics</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="{{ url_for('settings_page') }}" class="nav-item {% if active_page == 'settings' %}active{% endif %}" style="margin-bottom: 0.5rem;">
+                <i class="fa-solid fa-gear"></i>
+                <span>Settings</span>
+            </a>
+            <a href="{{ url_for('logout') }}" class="nav-item" style="color: var(--danger);">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- MAIN WRAPPER -->
+    <div class="main-wrapper">
+        <!-- HEADER -->
+        <header class="header">
+            <div class="header-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search for tasks, subjects...">
+            </div>
+            <div class="header-right">
+                <!-- Notifications Dropdown -->
+                <div class="dropdown-container">
+                    <div class="header-icon-wrapper" id="notificationToggle">
+                        <i class="fa-regular fa-bell header-icon"></i>
+                        {% if notifications|length > 0 %}
+                        <span class="notification-badge">{{ notifications|length }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="dropdown-menu notification-menu" id="notificationMenu">
+                        <div class="dropdown-header">Notifications</div>
+                        <div class="dropdown-content">
+                            {% for notif in notifications %}
+                            <div class="notification-item">
+                                <div class="notif-icon {{ notif.type }}"><i class="fa-solid {{ notif.icon }}"></i></div>
+                                <div class="notif-text">
+                                    <div class="notif-title">{{ notif.title }}</div>
+                                    <div class="notif-desc">{{ notif.message }}</div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div style="padding: 1rem; text-align: center; color: var(--text-muted); font-size: 0.875rem;">No new notifications.</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Dropdown -->
+                <div class="dropdown-container">
+                    <div class="user-profile" id="userDropdownToggle">
+                        <div class="user-avatar" style="overflow: hidden;">
+                            {% if current_user and current_user.profile_picture %}
+                                {% if current_user.profile_picture.endswith('.pdf') or current_user.profile_picture.endswith('.doc') or current_user.profile_picture.endswith('.docx') %}
+                                    <i class="fa-solid fa-file-lines" style="font-size: 1.2rem;"></i>
+                                {% else %}
+                                    <img src="{{ url_for('static', filename=current_user.profile_picture) }}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;" class="zoomable-profile-pic">
+                                {% endif %}
+                            {% else %}
+                                {{ current_user.username[0]|upper if current_user else 'U' }}
+                            {% endif %}
+                        </div>
+                        <div class="user-info">
+                            <div class="name">{{ current_user.username if current_user else 'User' }}</div>
+                            <div class="role">{{ current_user.role if current_user else 'Student' }}</div>
+                        </div>
+                        <i class="fa-solid fa-chevron-down text-muted" style="font-size: 0.75rem;"></i>
+                    </div>
+                    <div class="dropdown-menu user-menu" id="userMenu">
+                        <a href="{{ url_for('settings_page') }}" class="dropdown-item"><i class="fa-solid fa-gear"></i> Settings</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="{{ url_for('logout') }}" class="dropdown-item text-danger"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- PAGE CONTENT -->
+        <main class="content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- Image Zoom Modal -->
+    <div class="modal" id="imageZoomModal" style="z-index: 1050;">
+        <div style="position: relative; max-width: 90vw; max-height: 90vh; display: flex; justify-content: center; align-items: center;">
+            <i class="fa-solid fa-xmark close-btn" style="position: absolute; top: -30px; right: 0; color: white; font-size: 1.5rem; cursor: pointer;"></i>
+            <img id="zoomedImage" src="" alt="Zoomed Profile" style="max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+        </div>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

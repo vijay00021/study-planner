@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Study Planner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <div class="logo"><i class="fa-solid fa-layer-group"></i></div>
+            <h2>Create an Account</h2>
+            <p>Join us to start planning your studies</p>
+
+            <form action="{{ url_for('signup_page') }}" method="POST">
+                {% if error %}
+                <div style="background-color: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 0.75rem; border-radius: 6px; font-size: 0.875rem; font-weight: 500; margin-bottom: 1rem; text-align: left;">
+                    <i class="fa-solid fa-circle-exclamation" style="margin-right: 0.5rem;"></i>{{ error }}
+                </div>
+                {% endif %}
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" name="username" class="form-control" required placeholder="John Doe" value="{{ form_data.username if form_data else '' }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" name="email" class="form-control" required placeholder="name@example.com" value="{{ form_data.email if form_data else '' }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" required placeholder="Create a password" value="{{ form_data.password if form_data else '' }}">
+                    <p style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.25rem;">
+                        Min. 8 characters, with uppercase, lowercase, digit, and symbol.
+                    </p>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirm Password</label>
+                    <input type="password" name="confirm_password" class="form-control" required placeholder="Confirm your password">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+            </form>
+
+            <div style="margin-top: 2rem; font-size: 0.875rem;">
+                Already have an account? <a href="{{ url_for('login_page') }}" style="color: var(--primary); font-weight: 600;">Sign in</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

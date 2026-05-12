@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Settings</h1>
+        <p class="page-subtitle">Manage your account preferences</p>
+    </div>
+</div>
+
+<div class="card" style="max-width: 600px;">
+    <div class="card-body">
+        <h3 style="margin-bottom: 1.5rem;">Profile Information</h3>
+        <form action="{{ url_for('settings_page') }}" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label class="form-label">Profile Picture Upload</label>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <input type="file" name="profile_picture" class="form-control" accept="image/*,.pdf,.doc,.docx" required>
+                    <button type="submit" class="btn btn-primary" style="white-space: nowrap;">Upload Photo</button>
+                </div>
+                <small class="text-muted" style="font-size: 0.75rem; margin-top: 0.25rem; display: block;">Accepts JPEG, PNG, PDF, DOC, etc.</small>
+            </div>
+        </form>
+        
+        <h3 style="margin-bottom: 1.5rem; margin-top: 2rem;">Profile Information</h3>
+        <form action="{{ url_for('settings_page') }}" method="POST">
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                <input type="text" name="username" class="form-control" value="{{ current_user.username }}" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" name="email" class="form-control" value="{{ current_user.email }}" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Role</label>
+                <input type="text" class="form-control" value="{{ current_user.role }}" disabled>
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Save Profile Settings</button>
+            {% if error %}
+            <p class="text-danger" style="font-size: 0.875rem; margin-top: 1rem;">{{ error }}</p>
+            {% endif %}
+            {% if success %}
+            <p class="text-success" style="font-size: 0.875rem; margin-top: 1rem;">{{ success }}</p>
+            {% endif %}
+        </form>
+        
+        <h3 style="margin-bottom: 1.5rem; margin-top: 2.5rem;">Change Password</h3>
+        <form action="{{ url_for('settings_page') }}" method="POST">
+            <div class="form-group">
+                <label class="form-label">Current Password</label>
+                <input type="password" name="current_password" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">New Password</label>
+                <input type="password" name="new_password" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Confirm New Password</label>
+                <input type="password" name="confirm_password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Update Password</button>
+            {% if pwd_error %}
+            <p class="text-danger" style="font-size: 0.875rem; margin-top: 1rem;">{{ pwd_error }}</p>
+            {% endif %}
+            {% if pwd_success %}
+            <p class="text-success" style="font-size: 0.875rem; margin-top: 1rem;">{{ pwd_success }}</p>
+            {% endif %}
+        </form>
+    </div>
+</div>
+{% endblock %}

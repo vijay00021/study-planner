@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <div>
+        <h1 class="page-title">Welcome back, {{ current_user.username }}! 👋</h1>
+        <p class="page-subtitle">Stay consistent and achieve your goals.</p>
+    </div>
+    <button class="btn btn-primary" data-modal-target="#addSubjectModal">
+        <i class="fa-solid fa-plus"></i> Add Subject
+    </button>
+</div>
+
+<!-- STAT CARDS -->
+<div class="grid-cards" style="grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+    <div class="stat-card">
+        <div class="stat-icon purple"><i class="fa-solid fa-book-open"></i></div>
+        <div class="stat-info">
+            <div class="label">Total Subjects</div>
+            <div class="value">{{ total_subjects }}</div>
+            <div class="subtext" style="color: var(--primary); font-size: 0.75rem; margin-top: 0.25rem;">Active subjects</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon green"><i class="fa-solid fa-clipboard-check"></i></div>
+        <div class="stat-info">
+            <div class="label">Pending Tasks</div>
+            <div class="value">{{ pending_tasks }}</div>
+            <div class="subtext" style="color: var(--success); font-size: 0.75rem; margin-top: 0.25rem;">Tasks to complete</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon blue" style="background-color: rgba(59, 130, 246, 0.1); color: #3b82f6;"><i class="fa-regular fa-circle-check"></i></div>
+        <div class="stat-info">
+            <div class="label">Completed Tasks</div>
+            <div class="value">{{ completed_tasks }}</div>
+            <div class="subtext" style="color: #3b82f6; font-size: 0.75rem; margin-top: 0.25rem;">Tasks completed</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon orange"><i class="fa-solid fa-arrow-trend-up"></i></div>
+        <div class="stat-info">
+            <div class="label">Study Hours</div>
+            <div class="value">{{ study_hours }}</div>
+            <div class="subtext" style="color: var(--warning); font-size: 0.75rem; margin-top: 0.25rem;">This week</div>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-main-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+    <!-- COL 1: Today's Tasks -->
+    <div class="card" style="margin-bottom: 0;">
+        <div class="card-header" style="border-bottom: none; padding-bottom: 0.5rem;">
+            <span>Today's Tasks</span>
+            <a href="{{ url_for('tasks_page') }}" style="color: var(--primary); font-size: 0.875rem; font-weight: 500;">View all</a>
+        </div>
+        <div class="card-body">
+            <div class="item-list">
+                {% for task in tasks %}
+                <div class="item" style="border: none; padding: 0.75rem 0; border-bottom: 1px solid var(--surface-hover); border-radius: 0;">
+                    <div class="item-left" style="align-items: flex-start; gap: 0.75rem;">
+                        <a href="{{ url_for('complete_task', id=task.id) }}" style="color: {{ 'var(--success)' if task.status == 'Completed' else 'var(--border)' }}; font-size: 1.25rem; margin-top: 0.1rem;">
+                            <i class="{{ 'fa-solid fa-square-check' if task.status == 'Completed' else 'fa-regular fa-square' }}" style="border-radius: 4px;"></i>
+                        </a>
+                        <div>
+                            <div class="item-title" style="font-weight: 600; font-size: 0.875rem; text-decoration: {{ 'line-through' if task.status == 'Completed' else 'none' }}; color: {{ 'var(--text-muted)' if task.status == 'Completed' else 'inherit' }};">
+                                {{ task.task_name }}
+                            </div>
+                            <div class="item-meta" style="margin-top: 0.25rem;">
+                                {% if task.subject %}
+                                <span style="font-size: 0.75rem; color: var(--text-muted);">{{ task.subject.subject_name }}</span>
+                                {% else %}
+                                <span style="font-size: 0.75rem; color: var(--text-muted);">General</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% if task.scheduled_time %}
+                    <div class="item-actions">
+                        <span style="background-color: rgba(124, 58, 237, 0.1); color: var(--primary); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
+                            {{ task.scheduled_time }}
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <p class="text-muted text-center" style="padding: 1rem 0;">No tasks for today.</p>
+                {% endfor %}
+            </div>
+            <button class="btn btn-outline" style="width: 100%; margin-top: 1rem; border-style: dashed;" data-modal-target="#addTaskModal">
+                <i class="fa-solid fa-plus"></i> Add new task
+            </button>
+        </div>
+    </div>
+
+    <!-- COL 2: Progress Overview -->
+    <div class="card" style="margin-bottom: 0;">
+        <div class="card-header" style="border-bottom: none; padding-bottom: 0.5rem;">
+            <span>Progress Overview</span>
+            <span style="font-size: 0.875rem; color: var(--text-muted);">This Week <i class="fa-solid fa-chevron-down"></i></span>
+        </div>
+        <div class="card-body" style="display: flex; flex-direction: column; align-items: center;">
+            <div style="position: relative; width: 160px; height: 160px; margin-top: 1rem;">
+                <canvas id="progressChart"></canvas>
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: 700;">72%</div>
+                    <div style="font-size: 0.65rem; color: var(--text-muted);">Overall Progress</div>
+                </div>
+            </div>
+            <div style="margin-top: 1rem; font-weight: 600; font-size: 0.875rem;">Great job! Keep it up!</div>
+            
+            <div style="width: 100%; height: 120px; margin-top: 2rem;">
+                <canvas id="activityChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- COL 3: Subjects -->
+    <div class="card" style="margin-bottom: 0;">
+        <div class="card-header" style="border-bottom: none; padding-bottom: 0.5rem;">
+            <span>Subjects</span>
+            <a href="{{ url_for('subjects_page') }}" style="color: var(--primary); font-size: 0.875rem; font-weight: 500;">View all</a>
+        </div>
+        <div class="card-body">
+            <div class="item-list">
+                {% for subject in subjects %}
+                <div class="item" style="border: none; padding: 0.75rem 0; border-bottom: 1px solid var(--surface-hover); border-radius: 0;">
+                    <div class="item-left" style="align-items: center; gap: 0.75rem;">
+                        <div class="stat-icon purple" style="width: 36px; height: 36px; font-size: 1rem; background-color: rgba(124, 58, 237, 0.1); color: var(--primary); border-radius: 8px;">
+                            <i class="fa-solid fa-code"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <div class="item-title" style="font-size: 0.875rem; font-weight: 600;">{{ subject.subject_name }}</div>
+                            <div class="item-meta" style="font-size: 0.7rem; margin-top: 0.25rem;">Deadline: {{ subject.deadline or 'N/A' }}</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; width: 60px;">
+                        <span style="font-size: 0.75rem; font-weight: 600;">75%</span>
+                        <div style="width: 100%; height: 6px; background-color: var(--surface-hover); border-radius: 3px; overflow: hidden;">
+                            <div style="height: 100%; width: 75%; background-color: var(--primary); border-radius: 3px;"></div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-muted text-center" style="font-size: 0.875rem;">No subjects yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ROW 3: Upcoming Deadlines (Span 2) -->
+    <div class="card" style="grid-column: span 2;">
+        <div class="card-header" style="border-bottom: none; padding-bottom: 0.5rem;">
+            <span>Upcoming Deadlines</span>
+            <a href="#" style="color: var(--primary); font-size: 0.875rem; font-weight: 500;">View all</a>
+        </div>
+        <div class="card-body">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                {% for subject in subjects if subject.deadline %}
+                <div style="border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem; display: flex; flex-direction: column; gap: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <div class="stat-icon orange" style="width: 36px; height: 36px; font-size: 1rem; border-radius: 8px;"><i class="fa-regular fa-calendar"></i></div>
+                        <div>
+                            <div style="font-size: 0.875rem; font-weight: 600;">{{ subject.subject_name }}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">{{ subject.deadline }}</div>
+                        </div>
+                    </div>
+                    <div style="text-align: center; background-color: rgba(245, 158, 11, 0.1); color: var(--warning); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
+                        3 days left
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-muted text-center" style="font-size: 0.875rem; width: 100%;">No upcoming deadlines.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ROW 3: Calendar Widget -->
+    <div class="card">
+        <div class="card-body" style="padding: 1rem;">
+            <div id="mini-calendar"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Task Modal -->
+<div class="modal" id="addTaskModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Add New Task</h3>
+            <i class="fa-solid fa-xmark close-btn"></i>
+        </div>
+        <form action="{{ url_for('add_task') }}" method="POST">
+            <div class="form-group">
+                <label class="form-label">Task Name</label>
+                <input type="text" name="task_name" class="form-control" required placeholder="What do you need to do?">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Subject (Optional)</label>
+                <select name="subject_id" class="form-control">
+                    <option value="">-- Select Subject --</option>
+                    {% for subject in subjects %}
+                    <option value="{{ subject.id }}">{{ subject.subject_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Scheduled Time (Optional)</label>
+                <input type="text" name="scheduled_time" class="form-control" placeholder="e.g. 10:00 AM">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Save Task</button>
+        </form>
+    </div>
+</div>
+
+<!-- Add Subject Modal -->
+<div class="modal" id="addSubjectModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Add New Subject</h3>
+            <i class="fa-solid fa-xmark close-btn"></i>
+        </div>
+        <form action="{{ url_for('add_subject') }}" method="POST">
+            <div class="form-group">
+                <label class="form-label">Subject Name</label>
+                <input type="text" name="subject_name" class="form-control" required placeholder="e.g. Mathematics">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Deadline</label>
+                <input type="date" name="deadline" class="form-control">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Priority</label>
+                <select name="priority" class="form-control">
+                    <option value="High">High</option>
+                    <option value="Medium" selected>Medium</option>
+                    <option value="Low">Low</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Save Subject</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    window.completedTasks = {{ completed_tasks }};
+    window.pendingTasks = {{ pending_tasks }};
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('mini-calendar');
+        if (calendarEl && typeof FullCalendar !== 'undefined') {
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next',
+                    center: 'title',
+                    right: ''
+                },
+                events: '/api/calendar',
+                height: 350,
+                eventDisplay: 'block',
+                eventTimeFormat: {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    meridiem: 'short'
+                },
+                eventClick: function(info) {
+                    if (info.event.url) {
+                        window.location.href = info.event.url;
+                        info.jsEvent.preventDefault();
+                    }
+                }
+            });
+            calendar.render();
+        }
+    });
+</script>
+{% endblock %}

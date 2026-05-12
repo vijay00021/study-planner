@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Tasks{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">All Tasks</h1>
+        <p class="page-subtitle">View and manage all your pending and completed tasks</p>
+    </div>
+    <button class="btn btn-primary" data-modal-target="#addTaskModal">
+        <i class="fa-solid fa-plus"></i> Add Task
+    </button>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="item-list">
+            {% for task in tasks %}
+            <div class="item">
+                <div class="item-left">
+                    <a href="{{ url_for('complete_task', id=task.id) }}" style="color: {{ 'var(--success)' if task.status == 'Completed' else 'var(--border)' }}; font-size: 1.25rem;">
+                        <i class="{{ 'fa-solid fa-circle-check' if task.status == 'Completed' else 'fa-regular fa-circle' }}"></i>
+                    </a>
+                    <div>
+                        <div class="item-title" style="text-decoration: {{ 'line-through' if task.status == 'Completed' else 'none' }}; color: {{ 'var(--text-muted)' if task.status == 'Completed' else 'inherit' }};">
+                            {{ task.task_name }}
+                        </div>
+                        <div class="item-meta">
+                            {% if task.subject %}
+                            <span style="color: var(--primary);"><i class="fa-solid fa-tag"></i> {{ task.subject.subject_name }}</span>
+                            {% endif %}
+                            {% if task.scheduled_time %}
+                            <span><i class="fa-regular fa-clock"></i> {{ task.scheduled_time }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="item-actions">
+                    <span class="status-badge {{ task.status|lower }}">{{ task.status }}</span>
+                    <button class="btn btn-outline edit-task-btn" style="border: none; padding: 0.25rem; margin-left: 1rem;" 
+                        data-id="{{ task.id }}" 
+                        data-name="{{ task.task_name }}" 
+                        data-desc="{{ task.description or '' }}" 
+                        data-subject="{{ task.subject_id or '' }}" 
+                        data-time="{{ task.scheduled_time or '' }}">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <a href="{{ url_for('delete_task', id=task.id) }}" class="text-danger" style="margin-left: 0.5rem;"><i class="fa-solid fa-trash"></i></a>
+                </div>
+            </div>
+            {% else %}
+            <p class="text-muted text-center" style="padding: 2rem 0;">No tasks found. Enjoy your free time!</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Add Task Modal -->
+<div class="modal" id="addTaskModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Add New Task</h3>
+            <i class="fa-solid fa-xmark close-btn"></i>
+        </div>
+        <form action="{{ url_for('add_task') }}" method="POST">
+            <div class="form-group">
+                <label class="form-label">Task Name</label>
+                <input type="text" name="task_name" class="form-control" required placeholder="What do you need to do?">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Description (Optional)</label>
+                <textarea name="description" class="form-control" rows="3" placeholder="Add some details..."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Subject (Optional)</label>
+                <select name="subject_id" class="form-control">
+                    <option value="">-- Select Subject --</option>
+                    {% for subject in subjects %}
+                    <option value="{{ subject.id }}">{{ subject.subject_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Scheduled Time (Optional)</label>
+                <input type="datetime-local" name="scheduled_time" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Save Task</button>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Task Modal -->
+<div class="modal" id="editTaskModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Edit Task</h3>
+            <i class="fa-solid fa-xmark close-btn"></i>
+        </div>
+        <form id="editTaskForm" action="" method="POST">
+            <div class="form-group">
+                <label class="form-label">Task Name</label>
+                <input type="text" id="edit_task_name" name="task_name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Description (Optional)</label>
+                <textarea id="edit_description" name="description" class="form-control" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Subject (Optional)</label>
+                <select id="edit_subject_id" name="subject_id" class="form-control">
+                    <option value="">-- Select Subject --</option>
+                    {% for subject in subjects %}
+                    <option value="{{ subject.id }}">{{ subject.subject_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Scheduled Time (Optional)</label>
+                <input type="datetime-local" id="edit_scheduled_time" name="scheduled_time" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Update Task</button>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.edit-task-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.getElementById('editTaskForm').action = "/edit-task/" + this.dataset.id;
+            document.getElementById('edit_task_name').value = this.dataset.name;
+            document.getElementById('edit_description').value = this.dataset.desc;
+            document.getElementById('edit_subject_id').value = this.dataset.subject;
+            document.getElementById('edit_scheduled_time').value = this.dataset.time;
+            document.getElementById('editTaskModal').classList.add('active');
+        });
+    });
+});
+</script>
+{% endblock %}

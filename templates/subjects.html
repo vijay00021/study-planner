@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Subjects{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Manage Subjects</h1>
+        <p class="page-subtitle">Organize your study categories</p>
+    </div>
+    <button class="btn btn-primary" data-modal-target="#addSubjectModal">
+        <i class="fa-solid fa-plus"></i> Add Subject
+    </button>
+</div>
+
+<div class="grid-cards">
+    {% for subject in subjects %}
+    <div class="card" style="margin-bottom: 0;">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="stat-icon purple"><i class="fa-solid fa-book"></i></div>
+                <div class="dropdown">
+                    <a href="{{ url_for('delete_subject', id=subject.id) }}" class="text-danger" title="Delete Subject"><i class="fa-solid fa-trash"></i></a>
+                </div>
+            </div>
+            <h3 style="margin: 0.5rem 0;">{{ subject.subject_name }}</h3>
+            <p class="text-muted" style="font-size: 0.875rem;">
+                <i class="fa-regular fa-calendar" style="margin-right: 0.25rem;"></i> Due: {{ subject.deadline or 'No deadline' }}
+            </p>
+            <div style="margin-top: 1.5rem;">
+                <div class="d-flex justify-content-between text-muted" style="font-size: 0.75rem; margin-bottom: 0.25rem;">
+                    <span>Priority</span>
+                    <span class="status-badge {{ subject.priority|lower }}">{{ subject.priority }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <p class="text-muted text-center" style="grid-column: 1 / -1;">No subjects added yet. Create one to organize your tasks!</p>
+    {% endfor %}
+</div>
+
+<!-- Add Subject Modal -->
+<div class="modal" id="addSubjectModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Add New Subject</h3>
+            <i class="fa-solid fa-xmark close-btn"></i>
+        </div>
+        <form action="{{ url_for('add_subject') }}" method="POST">
+            <div class="form-group">
+                <label class="form-label">Subject Name</label>
+                <input type="text" name="subject_name" class="form-control" required placeholder="e.g. Mathematics">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Deadline</label>
+                <input type="date" name="deadline" class="form-control">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Priority</label>
+                <select name="priority" class="form-control">
+                    <option value="High">High</option>
+                    <option value="Medium" selected>Medium</option>
+                    <option value="Low">Low</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Save Subject</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

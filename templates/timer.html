@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block title %}Pomodoro Timer{% endblock %}
+
+{% block content %}
+<style>
+    .timer-control-btn {
+        transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease !important;
+    }
+    .timer-control-btn:not(:disabled):hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .timer-control-btn:not(:disabled):active {
+        transform: translateY(0);
+        box-shadow: none;
+    }
+</style>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Pomodoro Timer</h1>
+        <p class="page-subtitle">Focus on your tasks and log your study sessions</p>
+    </div>
+</div>
+
+<div class="card" style="max-width: 500px; margin: 0 auto; text-align: center; border-radius: var(--radius-lg); box-shadow: var(--shadow-md);">
+    <div class="card-body" style="padding: 3rem 2rem;">
+        
+        <!-- Mode Toggles -->
+        <div style="display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 2rem;">
+            <button id="mode-focus" class="btn btn-primary" style="border-radius: 20px; font-size: 0.85rem; padding: 0.4rem 1rem;">Focus</button>
+            <button id="mode-short" class="btn btn-outline" style="border-radius: 20px; font-size: 0.85rem; padding: 0.4rem 1rem;">Short Break (5m)</button>
+            <button id="mode-long" class="btn btn-outline" style="border-radius: 20px; font-size: 0.85rem; padding: 0.4rem 1rem;">Long Break (15m)</button>
+        </div>
+
+        <!-- Custom Time Input -->
+        <div id="setup-section" style="margin-bottom: 2rem; transition: opacity 0.3s;">
+            <label style="font-size: 0.875rem; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 0.5rem;">Set Time (Minutes)</label>
+            <input type="number" id="custom-minutes" value="25" min="1" max="120" style="width: 100px; text-align: center; font-size: 1.5rem; font-weight: 600; padding: 0.5rem; border: 2px solid var(--border); border-radius: 8px; background: var(--surface-hover); color: var(--text-main); outline: none; transition: border-color 0.2s;">
+        </div>
+
+        <!-- Timer Ring -->
+        <div style="position: relative; width: 260px; height: 260px; margin: 0 auto;">
+            <svg width="260" height="260" viewBox="0 0 260 260" style="transform: rotate(-90deg);">
+                <circle cx="130" cy="130" r="120" fill="none" stroke="var(--surface-hover)" stroke-width="12" />
+                <circle id="progress-ring" cx="130" cy="130" r="120" fill="none" stroke="var(--primary)" stroke-width="12" stroke-linecap="round" style="transition: stroke-dashoffset 1s linear;" />
+            </svg>
+            <div id="timer-display" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4.5rem; font-weight: 700; color: var(--text-main); font-variant-numeric: tabular-nums; line-height: 1; letter-spacing: -2px;">
+                25:00
+            </div>
+        </div>
+        
+        <!-- Controls -->
+        <div style="margin-top: 3rem; display: flex; justify-content: center; gap: 1rem;">
+            <button id="start-btn" class="btn btn-primary timer-control-btn" style="width: 110px; font-size: 1.1rem; border-radius: 25px;"><i class="fa-solid fa-play" style="margin-right: 0.5rem;"></i>Start</button>
+            <button id="pause-btn" class="btn btn-outline timer-control-btn" style="width: 110px; font-size: 1.1rem; border-radius: 25px;" disabled><i class="fa-solid fa-pause" style="margin-right: 0.5rem;"></i>Pause</button>
+            <button id="reset-btn" class="btn timer-control-btn" style="width: 110px; font-size: 1.1rem; border-radius: 25px; background: var(--surface-hover); color: var(--text-main);"><i class="fa-solid fa-rotate-right" style="margin-right: 0.5rem;"></i>Reset</button>
+        </div>
+        
+        <!-- Log Form -->
+        <form id="log-session-form" action="{{ url_for('log_session') }}" method="POST" style="margin-top: 2.5rem; display: none; background: rgba(16, 185, 129, 0.1); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid rgba(16, 185, 129, 0.2);">
+            <div style="font-size: 2.5rem; color: var(--success); margin-bottom: 0.5rem;"><i class="fa-solid fa-check-circle"></i></div>
+            <p style="margin-bottom: 1rem; color: var(--text-main); font-weight: 600; font-size: 1.1rem;">Time's up! Great job.</p>
+            <p id="log-text" style="margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.875rem;">Log this session to track your progress.</p>
+            <input type="hidden" name="duration" id="log-duration" value="25">
+            <button type="submit" id="log-submit-btn" class="btn btn-primary" style="background-color: var(--success); border-color: var(--success); width: 100%; border-radius: 25px; font-weight: 600;">Log Session</button>
+        </form>
+    </div>
+</div>
+
+<!-- Audio for notification -->
+<audio id="chime-audio" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const display = document.getElementById('timer-display');
+        const startBtn = document.getElementById('start-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const logForm = document.getElementById('log-session-form');
+        const customMinutesInput = document.getElementById('custom-minutes');
+        const setupSection = document.getElementById('setup-section');
+        const logDurationInput = document.getElementById('log-duration');
+        const logSubmitBtn = document.getElementById('log-submit-btn');
+        const logText = document.getElementById('log-text');
+        
+        const modeFocus = document.getElementById('mode-focus');
+        const modeShort = document.getElementById('mode-short');
+        const modeLong = document.getElementById('mode-long');
+        
+        // SVG Ring setup
+        const ring = document.getElementById('progress-ring');
+        const radius = ring.r.baseVal.value;
+        const circumference = radius * 2 * Math.PI;
+        ring.style.strokeDasharray = `${circumference} ${circumference}`;
+        ring.style.strokeDashoffset = 0;
+        
+        function setProgress(percent) {
+            const offset = circumference - percent / 100 * circumference;
+            ring.style.strokeDashoffset = offset;
+        }
+
+        // State Initialization from LocalStorage
+        let currentMode = localStorage.getItem('timerMode') || 'focus';
+        let initialTime = parseInt(localStorage.getItem('timerInitialTime')) || 25 * 60;
+        let timeLeft = parseInt(localStorage.getItem('timerTimeLeft')) || initialTime;
+        let isRunning = localStorage.getItem('timerRunning') === 'true';
+        let customDuration = parseInt(localStorage.getItem('timerDuration')) || 25;
+        
+        // Restore Custom Input Value
+        customMinutesInput.value = (initialTime / 60);
+
+        function updateDisplay() {
+            // Failsafe bounds checking
+            if (timeLeft < 0) timeLeft = 0;
+            
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            display.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Update Ring
+            const percent = (timeLeft / initialTime) * 100;
+            setProgress(percent);
+            
+            document.title = isRunning ? `${display.textContent} - Timer` : `Timer`;
+        }
+        
+        function updateUIState() {
+            // Update mode buttons
+            modeFocus.className = currentMode === 'focus' ? 'btn btn-primary' : 'btn btn-outline';
+            modeShort.className = currentMode === 'short' ? 'btn btn-primary' : 'btn btn-outline';
+            modeLong.className = currentMode === 'long' ? 'btn btn-primary' : 'btn btn-outline';
+            
+            if (currentMode === 'focus') ring.style.stroke = 'var(--primary)';
+            else if (currentMode === 'short') ring.style.stroke = 'var(--success)';
+            else if (currentMode === 'long') ring.style.stroke = 'var(--warning)';
+
+            if (isRunning) {
+                startBtn.disabled = true;
+                pauseBtn.disabled = false;
+                modeFocus.disabled = true;
+                modeShort.disabled = true;
+                modeLong.disabled = true;
+                logForm.style.display = 'none';
+                setupSection.style.opacity = '0.5';
+                customMinutesInput.disabled = true;
+            } else {
+                startBtn.disabled = false;
+                pauseBtn.disabled = true;
+                modeFocus.disabled = false;
+                modeShort.disabled = false;
+                modeLong.disabled = false;
+                setupSection.style.opacity = '1';
+                customMinutesInput.disabled = false;
+            }
+        }
+        
+        function changeMode(mode, mins) {
+            if (isRunning) return;
+            currentMode = mode;
+            customMinutesInput.value = mins;
+            initialTime = mins * 60;
+            timeLeft = initialTime;
+            customDuration = mins;
+            
+            // Save to storage
+            localStorage.setItem('timerMode', mode);
+            localStorage.setItem('timerInitialTime', initialTime.toString());
+            localStorage.setItem('timerTimeLeft', timeLeft.toString());
+            localStorage.setItem('timerDuration', customDuration.toString());
+            
+            updateUIState();
+            updateDisplay();
+            logForm.style.display = 'none';
+        }
+
+        modeFocus.addEventListener('click', () => changeMode('focus', 25));
+        modeShort.addEventListener('click', () => changeMode('short', 5));
+        modeLong.addEventListener('click', () => changeMode('long', 15));
+        
+        customMinutesInput.addEventListener('change', () => {
+            if (!isRunning) {
+                let mins = parseInt(customMinutesInput.value);
+                if (isNaN(mins) || mins < 1) mins = 1;
+                if (mins > 120) mins = 120;
+                customMinutesInput.value = mins;
+                
+                initialTime = mins * 60;
+                timeLeft = initialTime;
+                customDuration = mins;
+                
+                localStorage.setItem('timerInitialTime', initialTime.toString());
+                localStorage.setItem('timerTimeLeft', timeLeft.toString());
+                localStorage.setItem('timerDuration', customDuration.toString());
+                
+                updateDisplay();
+                logForm.style.display = 'none';
+            }
+        });
+        
+        startBtn.addEventListener('click', () => {
+            if (!isRunning) {
+                // Failsafe: if timer is at 0 and they hit start, reset it to current input
+                if (timeLeft <= 0) {
+                    let mins = parseInt(customMinutesInput.value) || 25;
+                    initialTime = mins * 60;
+                    timeLeft = initialTime;
+                    customDuration = mins;
+                    localStorage.setItem('timerInitialTime', initialTime.toString());
+                    localStorage.setItem('timerDuration', customDuration.toString());
+                }
+
+                isRunning = true;
+                let endTime = Date.now() + (timeLeft * 1000);
+                
+                // Save state globally
+                localStorage.setItem('timerRunning', 'true');
+                localStorage.setItem('timerEndTime', endTime.toString());
+                localStorage.setItem('timerMode', currentMode);
+                
+                logDurationInput.value = customDuration;
+                updateUIState();
+                updateDisplay();
+            }
+        });
+        
+        pauseBtn.addEventListener('click', () => {
+            if (isRunning) {
+                isRunning = false;
+                localStorage.setItem('timerRunning', 'false');
+                localStorage.setItem('timerTimeLeft', timeLeft.toString());
+                updateUIState();
+            }
+        });
+        
+        resetBtn.addEventListener('click', () => {
+            isRunning = false;
+            let mins = parseInt(customMinutesInput.value) || 25;
+            initialTime = mins * 60;
+            timeLeft = initialTime;
+            
+            localStorage.setItem('timerRunning', 'false');
+            localStorage.setItem('timerTimeLeft', timeLeft.toString());
+            localStorage.setItem('timerInitialTime', initialTime.toString());
+            
+            logForm.style.display = 'none';
+            updateUIState();
+            updateDisplay();
+        });
+
+        // Listen for Global Timer Events from script.js
+        window.addEventListener('globalTimerTick', () => {
+            if (isRunning) {
+                timeLeft = parseInt(localStorage.getItem('timerTimeLeft'));
+                updateDisplay();
+            }
+        });
+
+        window.addEventListener('globalTimerFinished', () => {
+            isRunning = false;
+            timeLeft = 0;
+            updateDisplay();
+            updateUIState();
+            
+            logDurationInput.value = customDuration;
+            logForm.style.display = 'block';
+            
+            if (currentMode !== 'focus') {
+                logText.textContent = "You completed a break! Ready to focus again?";
+                logSubmitBtn.style.display = "none";
+            } else {
+                logText.textContent = "Log this session to track your progress.";
+                logSubmitBtn.style.display = "block";
+            }
+        });
+
+        // Init Run
+        updateUIState();
+        updateDisplay();
+        
+        // Check if finished while page was loading
+        if (timeLeft <= 0 && !isRunning && localStorage.getItem('timerTimeLeft') === '0') {
+            logDurationInput.value = customDuration;
+            logForm.style.display = 'block';
+            if (currentMode !== 'focus') {
+                logText.textContent = "You completed a break! Ready to focus again?";
+                logSubmitBtn.style.display = "none";
+            } else {
+                logText.textContent = "Log this session to track your progress.";
+                logSubmitBtn.style.display = "block";
+            }
+        }
+    });
+</script>
+{% endblock %}
