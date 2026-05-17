@@ -36,7 +36,10 @@ def is_strong_password(password):
         return False, "Password must contain at least one special character (e.g. !@#$%^&*)."
     return True, ""
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+db_url = os.environ.get("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/studyplanner")
+if db_url and db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
