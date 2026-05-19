@@ -1,10 +1,10 @@
-# 📚 StudyPlan – Smart Study Planner Web App
+# 🚀 Study Planner – Smart Productivity & Study Management Platform
 
-A modern and responsive study planner web application designed to help students organize subjects, manage tasks, track deadlines, and improve productivity with an integrated Pomodoro timer and analytics dashboard.
+A modern and responsive study management web application designed to help students organize subjects, manage tasks, track deadlines, improve productivity, and stay focused using an integrated Pomodoro timer and analytics dashboard.
 
 ---
 
-# 🚀 Live Demo
+# 🌐 Live Demo
 
 🔗 https://study-planner-4735.onrender.com
 
@@ -18,12 +18,16 @@ A modern and responsive study planner web application designed to help students 
 - Session Management
 - Logout Functionality
 
+---
+
 ## 📊 Dashboard
 - Overview of total subjects
 - Pending & completed tasks
 - Progress tracking
 - Upcoming deadlines
 - Weekly analytics
+
+---
 
 ## 📚 Subject Management
 - Add subjects
@@ -32,16 +36,22 @@ A modern and responsive study planner web application designed to help students 
 - Priority management
 - Deadline tracking
 
+---
+
 ## ✅ Task Management
 - Create study tasks
 - Edit/Delete tasks
 - Track pending tasks
 - Organize tasks by subjects
 
+---
+
 ## 📅 Interactive Calendar
 - Monthly calendar view
 - Deadline visualization
 - Schedule management
+
+---
 
 ## ⏳ Pomodoro Timer
 - Focus sessions
@@ -49,10 +59,14 @@ A modern and responsive study planner web application designed to help students 
 - Long breaks
 - Start/Pause/Reset functionality
 
+---
+
 ## 📈 Analytics
 - Productivity overview
 - Study progress tracking
 - Weekly performance insights
+
+---
 
 ## 🎨 Modern UI/UX
 - Responsive design
@@ -74,7 +88,7 @@ A modern and responsive study planner web application designed to help students 
 - Flask
 
 ## Database
-- SQLite
+- PostgreSQL
 
 ## Deployment
 - Render
@@ -90,7 +104,9 @@ study-planner/
 ├── static/
 │   ├── css/
 │   ├── js/
-│   └── images/
+│   ├── images/
+│   ├── favicon.ico
+│   └── uploads/
 │
 ├── templates/
 │   ├── login.html
@@ -115,6 +131,7 @@ study-planner/
 ├── extensions.py
 ├── requirements.txt
 ├── render.yaml
+├── .env
 └── README.md
 ```
 
@@ -134,12 +151,14 @@ cd study-planner
 ## 2️⃣ Create Virtual Environment
 
 ### Windows
+
 ```bash
 python -m venv venv
 venv\Scripts\activate
 ```
 
 ### Mac/Linux
+
 ```bash
 python3 -m venv venv
 source venv/bin/activate
@@ -155,7 +174,18 @@ pip install -r requirements.txt
 
 ---
 
-## 4️⃣ Run the Application
+## 4️⃣ Configure Environment Variables
+
+Create a `.env` file in the root directory and add:
+
+```env
+SECRET_KEY=your_secret_key
+DATABASE_URL=your_postgresql_database_url
+```
+
+---
+
+## 5️⃣ Run the Application
 
 ```bash
 python app.py
@@ -163,7 +193,7 @@ python app.py
 
 ---
 
-## 5️⃣ Open in Browser
+## 6️⃣ Open in Browser
 
 ```txt
 http://127.0.0.1:5000
@@ -176,20 +206,30 @@ http://127.0.0.1:5000
 ## 👤 Register Account
 Create an account using the registration page.
 
+---
+
 ## ➕ Add Subjects
 Add subjects with:
 - Subject name
 - Priority
 - Deadline
 
+---
+
 ## ✅ Manage Tasks
 Create and organize study tasks efficiently.
+
+---
 
 ## 📅 Track Deadlines
 Use dashboard and calendar to monitor deadlines.
 
+---
+
 ## ⏳ Focus with Pomodoro Timer
 Boost productivity using focus sessions and breaks.
+
+---
 
 ## 📊 Analyze Progress
 Monitor study consistency and task completion.
@@ -200,17 +240,34 @@ Monitor study consistency and task completion.
 
 This project is deployed using Render.
 
-## Deploy on Render
+---
+
+## 🚀 Deploy on Render
 
 ### Build Command
+
 ```bash
 pip install -r requirements.txt
 ```
 
 ### Start Command
+
 ```bash
 gunicorn app:app
 ```
+
+---
+
+## 🗄️ Database Setup
+
+This project uses PostgreSQL for production deployment.
+
+Make sure to configure the following environment variables in Render:
+
+| Variable | Description |
+|---|---|
+| SECRET_KEY | Flask secret key |
+| DATABASE_URL | PostgreSQL connection URL |
 
 ---
 
@@ -258,14 +315,15 @@ gunicorn app:app
 
 # 🔮 Future Improvements
 
-- Dark mode support
-- Email notifications
-- Mobile responsive optimization
-- AI study recommendations
+- AI-powered study recommendations
+- Real-time notifications
+- Collaborative study groups
+- Progress heatmaps
+- Export analytics reports
 - Google Calendar integration
 - Notes section
-- File uploads
 - Study streak tracking
+- Dark mode support
 
 ---
 
@@ -274,7 +332,7 @@ gunicorn app:app
 Contributions are welcome!
 
 1. Fork the repository
-2. Create feature branch
+2. Create a feature branch
 3. Commit changes
 4. Push to branch
 5. Open Pull Request
