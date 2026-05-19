@@ -176,4 +176,46 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }, 1000);
+
+    // --- Password Visibility Toggle Logic ---
+    const toggleBtns = document.querySelectorAll('.password-toggle-btn');
+    toggleBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const container = this.closest('.password-container');
+            if (container) {
+                const input = container.querySelector('input');
+                const icon = this.querySelector('i');
+                if (input && icon) {
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        input.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                }
+            }
+        });
+    });
+
+    // --- Custom Delete Confirmation Modal Logic ---
+    const deleteBtns = document.querySelectorAll('.delete-confirm');
+    const deleteModal = document.getElementById('deleteConfirmModal');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+    if (deleteBtns.length > 0 && deleteModal && confirmDeleteBtn) {
+        deleteBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const deleteUrl = this.getAttribute('data-delete-url') || this.getAttribute('href');
+                if (deleteUrl && deleteUrl !== '#' && !deleteUrl.startsWith('javascript:')) {
+                    confirmDeleteBtn.setAttribute('href', deleteUrl);
+                    deleteModal.classList.add('active');
+                }
+            });
+        });
+    }
 });

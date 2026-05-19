@@ -46,7 +46,7 @@
                         data-time="{{ task.scheduled_time or '' }}">
                         <i class="fa-solid fa-pen"></i>
                     </button>
-                    <a href="{{ url_for('delete_task', id=task.id) }}" class="text-danger" style="margin-left: 0.5rem;"><i class="fa-solid fa-trash"></i></a>
+                    <a href="#" class="text-danger delete-confirm" data-delete-url="{{ url_for('delete_task', id=task.id) }}" style="margin-left: 0.5rem;"><i class="fa-solid fa-trash"></i></a>
                 </div>
             </div>
             {% else %}

@@ -21,7 +21,7 @@
                 <div class="stat-icon purple"><i class="fa-solid fa-book"></i></div>
                 <div class="d-flex gap-2">
                     <a href="#" class="text-primary" data-modal-target="#editSubjectModal{{ subject.id }}" title="Edit Subject"><i class="fa-solid fa-pen-to-square"></i></a>
-                    <a href="{{ url_for('delete_subject', id=subject.id) }}" class="text-danger" title="Delete Subject"><i class="fa-solid fa-trash"></i></a>
+                    <a href="#" class="text-danger delete-confirm" data-delete-url="{{ url_for('delete_subject', id=subject.id) }}" title="Delete Subject"><i class="fa-solid fa-trash"></i></a>
                 </div>
             </div>
             <h3 style="margin: 0.5rem 0;">{{ subject.subject_name }}</h3>
