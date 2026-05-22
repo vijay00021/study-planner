@@ -218,4 +218,56 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+
+    // --- Guest Interception Logic ---
+    if (window.isGuest) {
+        const loginModal = document.getElementById('loginRequiredModal');
+        
+        function openLoginModal() {
+            if (loginModal) loginModal.classList.add('active');
+        }
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === loginModal) {
+                loginModal.classList.remove('active');
+            }
+        });
+
+        // 1. Intercept sidebar navigation links (except Dashboard)
+        const sidebarLinks = document.querySelectorAll('.sidebar-nav a.nav-item');
+        sidebarLinks.forEach(link => {
+            const href = link.getAttribute('href');
+            if (href && !href.endsWith('/') && !href.includes('/dashboard')) {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openLoginModal();
+                });
+            }
+        });
+
+        // 2. Intercept add buttons
+        const addButtons = document.querySelectorAll('[data-modal-target="#addSubjectModal"], [data-modal-target="#addTaskModal"]');
+        addButtons.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                openLoginModal();
+            });
+        });
+
+        // 3. Intercept task and subject action links (checkboxes, edits, deletions)
+        document.body.addEventListener('click', function(e) {
+            const target = e.target.closest('a');
+            if (target) {
+                const href = target.getAttribute('href');
+                if (href && (href.includes('complete-task') || href.includes('delete-task') || href.includes('edit-task') || href.includes('delete-subject') || href.includes('edit-subject') || href.includes('add-subject') || href.includes('add-task'))) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openLoginModal();
+                }
+            }
+        });
+    }
 });

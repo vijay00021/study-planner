@@ -20,6 +20,9 @@
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
+    <script>
+        window.isGuest = {% if current_user %}false{% else %}true{% endif %};
+    </script>
 </head>
 <body>
 
@@ -31,7 +34,7 @@
         </a>
         
         <nav class="sidebar-nav">
-            <a href="{{ url_for('home') }}" class="nav-item {% if active_page == 'dashboard' %}active{% endif %}">
+            <a href="{% if current_user %}{{ url_for('home') }}{% else %}{{ url_for('dashboard_page') }}{% endif %}" class="nav-item {% if active_page == 'dashboard' %}active{% endif %}">
                 <i class="fa-solid fa-house"></i>
                 <span>Dashboard</span>
             </a>
@@ -161,6 +164,23 @@
         <div style="position: relative; max-width: 90vw; max-height: 90vh; display: flex; justify-content: center; align-items: center;">
             <i class="fa-solid fa-xmark close-btn" style="position: absolute; top: -30px; right: 0; color: white; font-size: 1.5rem; cursor: pointer;"></i>
             <img id="zoomedImage" src="" alt="Zoomed Profile" style="max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+        </div>
+    </div>
+
+    <!-- Login Required Modal -->
+    <div class="modal" id="loginRequiredModal" style="z-index: 1070;">
+        <div class="modal-content" style="max-width: 420px; text-align: center; padding: 2.5rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); background-color: var(--surface);">
+            <div style="width: 64px; height: 64px; background-color: rgba(124, 58, 237, 0.1); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1.5rem auto;">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h3 style="margin-bottom: 0.75rem; font-size: 1.5rem; color: var(--text-main); font-weight: 700;">Login Required</h3>
+            <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 2rem; line-height: 1.6;">
+                Sign in or register an account with StudyWise to start planning subjects, scheduling tasks, tracking hours with the focus timer, and monitoring detailed progress analytics!
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <a href="{{ url_for('login_page') }}" class="btn btn-outline" style="flex: 1; padding: 0.75rem; font-weight: 600; border-color: var(--border);">Sign In</a>
+                <a href="{{ url_for('signup_page') }}" class="btn btn-primary" style="flex: 1; padding: 0.75rem; font-weight: 600; text-decoration: none; display: flex; align-items: center; justify-content: center;">Sign Up</a>
+            </div>
         </div>
     </div>
 

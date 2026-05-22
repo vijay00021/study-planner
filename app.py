@@ -243,6 +243,50 @@ def home():
                                total_subjects=total_subjects, pending_tasks=pending_tasks,
                                completed_tasks=completed_tasks, study_hours=study_hours, active_page='home')
 
+@app.route('/dashboard')
+def dashboard_page():
+    if 'user_id' in session:
+        return redirect(url_for('home'))
+
+    class MockSubject:
+        def __init__(self, id, name, deadline, priority, days_left):
+            self.id = id
+            self.subject_name = name
+            self.deadline = deadline
+            self.priority = priority
+            self.days_left = days_left
+
+    class MockTask:
+        def __init__(self, id, name, subject, status, scheduled_time):
+            self.id = id
+            self.task_name = name
+            self.subject = subject
+            self.status = status
+            self.scheduled_time = scheduled_time
+
+    s1 = MockSubject(1, "Mathematics", "2026-05-25", "High", 3)
+    s2 = MockSubject(2, "Computer Science", "2026-05-28", "Medium", 6)
+    s3 = MockSubject(3, "Physics", "2026-05-24", "High", 2)
+    s4 = MockSubject(4, "Chemistry", "2026-06-02", "Low", 11)
+
+    t1 = MockTask(1, "Solve Calculus exercises", s1, "Pending", "10:00 AM")
+    t2 = MockTask(2, "Implement binary search tree", s2, "Completed", "02:30 PM")
+    t3 = MockTask(3, "Review thermodynamics notes", s3, "Pending", "04:00 PM")
+    t4 = MockTask(4, "Lab report preparation", s4, "Pending", "09:00 AM")
+    t5 = MockTask(5, "Prepare presentation slides", s2, "Completed", "01:00 PM")
+
+    subjects = [s1, s2, s3, s4]
+    tasks = [t1, t2, t3, t4, t5]
+
+    total_subjects = len(subjects)
+    pending_tasks = sum(1 for t in tasks if t.status == "Pending")
+    completed_tasks = sum(1 for t in tasks if t.status == "Completed")
+    study_hours = 24
+
+    return render_template('index.html', subjects=subjects, tasks=tasks,
+                           total_subjects=total_subjects, pending_tasks=pending_tasks,
+                           completed_tasks=completed_tasks, study_hours=study_hours, active_page='dashboard')
+
 @app.route('/subjects')
 @login_required
 def subjects_page():

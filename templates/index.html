@@ -5,7 +5,7 @@
 {% block content %}
 <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
     <div>
-        <h1 class="page-title">Welcome back, {{ current_user.username }}! 👋</h1>
+        <h1 class="page-title">Welcome back, {{ current_user.username if current_user else 'Guest' }}! 👋</h1>
         <p class="page-subtitle">Stay consistent and achieve your goals.</p>
     </div>
     <button class="btn btn-primary" data-modal-target="#addSubjectModal">
@@ -276,7 +276,11 @@
                     meridiem: 'short'
                 },
                 eventClick: function(info) {
-                    if (info.event.url) {
+                    if (window.isGuest) {
+                        info.jsEvent.preventDefault();
+                        const modal = document.getElementById('loginRequiredModal');
+                        if (modal) modal.classList.add('active');
+                    } else if (info.event.url) {
                         window.location.href = info.event.url;
                         info.jsEvent.preventDefault();
                     }
