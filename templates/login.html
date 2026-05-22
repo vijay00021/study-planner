@@ -3,50 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Study Planner</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Login - StudyWise</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
 <body>
-    <div class="auth-wrapper">
-        <div class="auth-card">
-            <div class="logo"><i class="fa-solid fa-layer-group"></i></div>
-            <h2>Welcome Back</h2>
-            <p>Enter your credentials to access your dashboard</p>
-            
-            {% if error %}
-            <div style="background-color: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 0.75rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; font-size: 0.875rem;">
-                {{ error }}
+    <div class="split-container">
+        <!-- HEADER OVERLAY -->
+        <header class="split-header text-light-left text-dark-right" style="position: absolute; top: 0; left: 0; width: 100%; height: 80px; display: flex; justify-content: space-between; align-items: center; padding: 0 4rem; z-index: 100; pointer-events: none;">
+            <a href="/" class="landing-brand" style="pointer-events: auto; color: white;">
+                <i class="fa-solid fa-layer-group" style="color: white;"></i>
+                <span>StudyWise</span>
+            </a>
+            <div style="pointer-events: auto; display: flex; align-items: center; gap: 2rem;">
+                <a href="/" class="auth-nav-link" style="color: var(--text-muted);">Home</a>
+                <a href="{{ url_for('login_page') }}" class="auth-nav-link active" style="color: var(--text-main);">Login</a>
+                <a href="{{ url_for('signup_page') }}" class="btn-nav-signup" style="background-color: var(--primary); color: white !important;">Sign Up</a>
             </div>
-            {% endif %}
+        </header>
 
-            <form action="{{ url_for('login_page') }}" method="POST">
-                <div class="form-group">
-                    <label class="form-label">Email Address</label>
-                    <input type="email" name="email" class="form-control" required placeholder="name@example.com" value="{{ email if email else '' }}">
+        <!-- LEFT SIDE: INFO & STATS -->
+        <div class="side-info">
+            <div style="max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; height: 100%; justify-content: space-between; padding-top: 4rem;">
+                <!-- Main quote block -->
+                <div style="margin-top: auto; margin-bottom: auto;">
+                    <div style="width: 56px; height: 56px; background-color: rgba(255, 255, 255, 0.15); color: white; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 2rem;">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <h2 style="font-size: 2.25rem; font-weight: 800; line-height: 1.25; margin-bottom: 1rem;">Achieve Academic Excellence, Together</h2>
+                    <p style="font-size: 1.05rem; opacity: 0.9; line-height: 1.6;">
+                        Join thousands of students actively tracking, planning, and optimizing their study schedules.
+                    </p>
                 </div>
-                <div class="form-group">
-                    <label class="form-label" style="display: flex; justify-content: space-between;">
-                        Password
-                        <a href="{{ url_for('forgot_password') }}" style="color: var(--primary); font-size: 0.75rem;">Forgot Password?</a>
-                    </label>
-                    <div class="password-container">
-                        <input type="password" name="password" class="form-control" required placeholder="••••••••">
-                        <button type="button" class="password-toggle-btn">
-                            <i class="fa-solid fa-eye"></i>
-                        </button>
+
+                <!-- Stats block -->
+                <div class="stats-grid">
+                    <div class="stat-item-box">
+                        <div class="stat-num">12K+</div>
+                        <div class="stat-desc">Hours Studied</div>
+                    </div>
+                    <div class="stat-item-box">
+                        <div class="stat-num">95%</div>
+                        <div class="stat-desc">Goal Completion</div>
+                    </div>
+                    <div class="stat-item-box">
+                        <div class="stat-num">50+</div>
+                        <div class="stat-desc">Subjects Tracked</div>
                     </div>
                 </div>
-                <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem;">
-                    <input type="checkbox" name="remember" id="remember" style="width: auto; margin: 0; accent-color: var(--primary);">
-                    <label for="remember" style="margin: 0; font-size: 0.875rem; color: var(--text-main); font-weight: 500; cursor: pointer;">Remember me</label>
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">Sign In</button>
-            </form>
+            </div>
+        </div>
 
-            <div style="margin-top: 2rem; font-size: 0.875rem;">
-                Don't have an account? <a href="{{ url_for('signup_page') }}" style="color: var(--primary); font-weight: 600;">Sign up</a>
+        <!-- RIGHT SIDE: FORM -->
+        <div class="side-form">
+            <div class="auth-form-card" style="margin-top: 2rem;">
+                <h2>Welcome Back</h2>
+                <p class="subtitle">Sign in to continue to your dashboard</p>
+                
+                {% if error %}
+                <div style="background-color: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 0.75rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; font-size: 0.875rem;">
+                    {{ error }}
+                </div>
+                {% endif %}
+
+                <form action="{{ url_for('login_page') }}" method="POST">
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-envelope"></i>
+                            <input type="email" name="email" class="form-control" required placeholder="name@example.com" value="{{ email if email else '' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" style="display: flex; justify-content: space-between;">
+                            Password
+                            <a href="{{ url_for('forgot_password') }}" style="color: var(--primary); font-size: 0.75rem; font-weight: 500;">Forgot Password?</a>
+                        </label>
+                        <div class="password-container input-with-icon">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" name="password" class="form-control" required placeholder="••••••••">
+                            <button type="button" class="password-toggle-btn">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem;">
+                        <input type="checkbox" name="remember" id="remember" style="width: auto; margin: 0; accent-color: var(--primary);">
+                        <label for="remember" style="margin: 0; font-size: 0.875rem; color: var(--text-main); font-weight: 500; cursor: pointer;">Remember me</label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; border-radius: 25px; font-weight: 600; padding: 0.8rem;">
+                        <span>Sign In</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </form>
+
+                <div style="margin-top: 2.5rem; font-size: 0.875rem; text-align: center; color: var(--text-muted);">
+                    Don't have an account? <a href="{{ url_for('signup_page') }}" style="color: var(--primary); font-weight: 600;">Create one</a>
+                </div>
             </div>
         </div>
     </div>

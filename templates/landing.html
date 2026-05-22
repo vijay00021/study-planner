@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyWise - Smart Study Planner</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- FullCalendar -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+
+    <div class="landing-container">
+        <!-- HEADER -->
+        <header class="landing-header">
+            <a href="/" class="landing-brand">
+                <i class="fa-solid fa-layer-group"></i>
+                <span>StudyWise</span>
+            </a>
+            <nav class="landing-nav">
+                <a href="/" class="landing-nav-link active">Home</a>
+                <a href="{{ url_for('login_page') }}" class="landing-nav-link">Login</a>
+                <a href="{{ url_for('signup_page') }}" class="btn-landing-signup">Sign Up</a>
+            </nav>
+        </header>
+
+        <!-- HERO SECTION -->
+        <section class="landing-hero">
+            <div class="hero-content">
+                <div class="hero-tag">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <span>Smart Learning Assistant</span>
+                </div>
+                <h1>Empower Your Learning,<br><span class="gradient-text">Achieve Academic Excellence</span></h1>
+                <p class="subtitle">
+                    StudyWise helps you organize your study schedule, track tasks, focus with Pomodoro timers, and monitor detailed progress analytics. Structure your academic success one session at a time.
+                </p>
+                <div class="hero-actions">
+                    <a href="{{ url_for('signup_page') }}" class="btn btn-primary">Start Planning Now</a>
+                    <a href="#dashboard-section" class="btn btn-outline">Explore Dashboard</a>
+                </div>
+                <div class="hero-social-proof">
+                    <div style="display: flex; gap: 0.25rem;">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                    <span>Join 10,000+ students making their learning efficient</span>
+                </div>
+            </div>
+
+            <div class="hero-visual">
+                <!-- Floating badge 1 -->
+                <div class="preview-badge-floating badge-top">
+                    <i class="fa-solid fa-circle-check" style="color: var(--success);"></i>
+                    <div>
+                        <div style="font-size: 0.8rem; font-weight: 700;">Calculus homework</div>
+                        <div style="font-size: 0.65rem; color: var(--text-muted);">Completed 2m ago</div>
+                    </div>
+                </div>
+
+                <!-- Preview Card -->
+                <div class="hero-preview-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <span style="font-weight: 700; font-size: 0.95rem;">Focus Session</span>
+                        <span style="font-size: 0.75rem; background: rgba(16, 185, 129, 0.1); color: var(--success); padding: 0.25rem 0.5rem; border-radius: 20px; font-weight: 600;">Active</span>
+                    </div>
+                    <!-- Timer ring simulation -->
+                    <div style="position: relative; width: 140px; height: 140px; margin: 0 auto 1.5rem auto;">
+                        <svg width="140" height="140" viewBox="0 0 140 140" style="transform: rotate(-90deg);">
+                            <circle cx="70" cy="70" r="62" fill="none" stroke="var(--surface-hover)" stroke-width="8" />
+                            <circle cx="70" cy="70" r="62" fill="none" stroke="var(--primary)" stroke-width="8" stroke-dasharray="390" stroke-dashoffset="100" stroke-linecap="round" />
+                        </svg>
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                            <div style="font-size: 2rem; font-weight: 700;">18:45</div>
+                            <div style="font-size: 0.65rem; color: var(--text-muted); font-weight: 600;">Remaining</div>
+                        </div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.25rem;">Chemistry Exam Prep</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">Subject: Chemistry Organic</div>
+                    </div>
+                </div>
+
+                <!-- Floating badge 2 -->
+                <div class="preview-badge-floating badge-bottom">
+                    <i class="fa-solid fa-bolt" style="color: var(--warning); font-size: 1.1rem;"></i>
+                    <div>
+                        <div style="font-size: 0.8rem; font-weight: 700;">2.5 Hour Study Streak</div>
+                        <div style="font-size: 0.65rem; color: var(--text-muted);">Weekly Goal: 80%</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DASHBOARD DISPLAY -->
+        <section class="landing-dashboard-section" id="dashboard-section">
+            <div class="section-header">
+                <h2>Our Premium Workspace</h2>
+                <p>An intuitive interface to manage everything. Experience the dashboard below.</p>
+            </div>
+
+            <!-- STAT CARDS -->
+            <div class="grid-cards" style="grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+                <div class="stat-card">
+                    <div class="stat-icon purple"><i class="fa-solid fa-book-open"></i></div>
+                    <div class="stat-info">
+                        <div class="label">Total Subjects</div>
+                        <div class="value">{{ total_subjects }}</div>
+                        <div class="subtext" style="color: var(--primary); font-size: 0.75rem; margin-top: 0.25rem;">Active subjects</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green"><i class="fa-solid fa-clipboard-check"></i></div>
+                    <div class="stat-info">
+                        <div class="label">Pending Tasks</div>
+                        <div class="value">{{ pending_tasks }}</div>
+                        <div class="subtext" style="color: var(--success); font-size: 0.75rem; margin-top: 0.25rem;">Tasks to complete</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon blue" style="background-color: rgba(59, 130, 246, 0.1); color: #3b82f6;"><i class="fa-regular fa-circle-check"></i></div>
+                    <div class="stat-info">
+                        <div class="label">Completed Tasks</div>
+                        <div class="value">{{ completed_tasks }}</div>
+                        <div class="subtext" style="color: #3b82f6; font-size: 0.75rem; margin-top: 0.25rem;">Tasks completed</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                    <div class="stat-info">
+                        <div class="label">Study Hours</div>
+                        <div class="value">{{ study_hours }}</div>
+                        <div class="subtext" style="color: var(--warning); font-size: 0.75rem; margin-top: 0.25rem;">This week</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DASHBOARD GRID -->
+            <div class="dashboard-main-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+                <!-- COL 1: Today's Tasks -->
+                <div class="card" style="margin-bottom: 0;">
+                    <div class="card-header" style="border-bottom: none; padding-bottom: 0.5rem;">
+                        <span>Today's Tasks</span>
+                        <a href="#" class="protected-action" style="color: var(--primary); font-size: 0.875rem; font-weight: 500;">View all</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="item-list">
+                            {% for task in tasks %}
+                            <div class="item" style="border: none; padding: 0.75rem 0; border-bottom: 1px solid var(--surface-hover); border-radius: 0;">
+                                <div class="item-left" style="align-items: flex-start; gap: 0.75rem;">
+                                    <a href="#" class="protected-action" style="color: {{ 'var(--success)' if task.status == 'Completed' else 'var(--border)' }}; font-size: 1.25rem; margin-top: 0.1rem;">
+                                        <i class="{{ 'fa-solid fa-square-check' if task.status == 'Completed' else 'fa-regular fa-square' }}" style="border-radius: 4px;"></i>
+                                    </a>
+                                    <div>
+                                        <div class="item-title" style="font-weight: 600; font-size: 0.875rem; text-decoration: {{ 'line-through' if task.status == 'Completed' else 'none' }}; color: {{ 'var(--text-muted)' if task.status == 'Completed' else 'inherit' }};">
+                                            {{ task.task_name }}
+                                        </div>
+                                        <div class="item-meta" style="margin-top: 0.25rem;">
+                                            {% if task.subject %}
+                                            <span style="font-size: 0.75rem; color: var(--text-muted);">{{ task.subject.subject_name }}</span>
+                                            {% else %}
+                                            <span style="font-size: 0.75rem; color: var(--text-muted);">General</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% if task.scheduled_time %}
+                                <div class="item-actions">
+                                    <span style="background-color: rgba(124, 58, 237, 0.1); color: var(--primary); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
+                                        {{ task.scheduled_time }}
+                                    </span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <button class="btn btn-outline protected-action" style="width: 100%; margin-top: 1rem; border-style: dashed;">
+                            <i class="fa-solid fa-plus"></i> Add new task
+                        </button>
+                    </div>
+                </div>
+
+                <!-- COL 2: Progress Overview -->
+                <div class="card" style="margin-bottom: 0;">
+                    <div class="card-header" style="border-bottom: none; padding-bottom: 0.5rem;">
+                        <span>Progress Overview</span>
+                        <span style="font-size: 0.875rem; color: var(--text-muted);">This Week <i class="fa-solid fa-chevron-down"></i></span>
+                    </div>
+                    <div class="card-body" style="display: flex; flex-direction: column; align-items: center;">
+                        <div style="position: relative; width: 160px; height: 160px; margin-top: 1rem;">
+                            <canvas id="progressChart"></canvas>
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                                <div style="font-size: 1.5rem; font-weight: 700;">72%</div>
+                                <div style="font-size: 0.65rem; color: var(--text-muted);">Overall Progress</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 1rem; font-weight: 600; font-size: 0.875rem;">Great job! Keep it up!</div>
+                        
+                        <div style="width: 100%; height: 120px; margin-top: 2rem;">
+                            <canvas id="activityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COL 3: Subjects -->
+                <div class="card" style="margin-bottom: 0;">
+                    <div class="card-header" style="border-bottom: none; padding-bottom: 0.5rem;">
+                        <span>Subjects</span>
+                        <a href="#" class="protected-action" style="color: var(--primary); font-size: 0.875rem; font-weight: 500;">View all</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="item-list">
+                            {% for subject in subjects %}
+                            <div class="item" style="border: none; padding: 0.75rem 0; border-bottom: 1px solid var(--surface-hover); border-radius: 0;">
+                                <div class="item-left" style="align-items: center; gap: 0.75rem;">
+                                    <div class="stat-icon purple" style="width: 36px; height: 36px; font-size: 1rem; background-color: rgba(124, 58, 237, 0.1); color: var(--primary); border-radius: 8px;">
+                                        <i class="fa-solid fa-code"></i>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <div class="item-title" style="font-size: 0.875rem; font-weight: 600;">{{ subject.subject_name }}</div>
+                                        <div class="item-meta" style="font-size: 0.7rem; margin-top: 0.25rem;">Deadline: {{ subject.deadline or 'N/A' }}</div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; width: 60px;">
+                                    <span style="font-size: 0.75rem; font-weight: 600;">75%</span>
+                                    <div style="width: 100%; height: 6px; background-color: var(--surface-hover); border-radius: 3px; overflow: hidden;">
+                                        <div style="height: 100%; width: 75%; background-color: var(--primary); border-radius: 3px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ROW 3: Upcoming Deadlines (Span 2) -->
+                <div class="card" style="grid-column: span 2;">
+                    <div class="card-header" style="border-bottom: none; padding-bottom: 0.5rem;">
+                        <span>Upcoming Deadlines</span>
+                        <a href="#" class="protected-action" style="color: var(--primary); font-size: 0.875rem; font-weight: 500;">View all</a>
+                    </div>
+                    <div class="card-body">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            {% for subject in subjects if subject.deadline and subject.days_left is not none and 0 <= subject.days_left <= 7 %}
+                            <div style="border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem; display: flex; flex-direction: column; gap: 1rem;">
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <div class="stat-icon orange" style="width: 36px; height: 36px; font-size: 1rem; border-radius: 8px;"><i class="fa-regular fa-calendar"></i></div>
+                                    <div>
+                                        <div style="font-size: 0.875rem; font-weight: 600;">{{ subject.subject_name }}</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-muted);">{{ subject.deadline }}</div>
+                                    </div>
+                                </div>
+                                <div style="text-align: center; background-color: rgba(245, 158, 11, 0.1); color: var(--warning); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
+                                    {% if subject.days_left == 0 %}
+                                        Due today
+                                    {% elif subject.days_left == 1 %}
+                                        1 day left
+                                    {% else %}
+                                        {{ subject.days_left }} days left
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ROW 3: Calendar Widget -->
+                <div class="card">
+                    <div class="card-body" style="padding: 1rem;">
+                        <div id="mini-calendar"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Login Required Modal -->
+    <div class="modal" id="loginRequiredModal">
+        <div class="modal-content" style="max-width: 420px; text-align: center; padding: 2.5rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); background-color: var(--surface);">
+            <div style="width: 64px; height: 64px; background-color: rgba(124, 58, 237, 0.1); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1.5rem auto;">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h3 style="margin-bottom: 0.75rem; font-size: 1.5rem; color: var(--text-main); font-weight: 700;">Login Required</h3>
+            <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 2rem; line-height: 1.6;">
+                Sign in or register an account with StudyWise to start planning subjects, scheduling tasks, tracking hours with the focus timer, and monitoring detailed progress analytics!
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <a href="{{ url_for('login_page') }}" class="btn btn-outline" style="flex: 1; padding: 0.75rem; font-weight: 600; border-color: var(--border);">Sign In</a>
+                <a href="{{ url_for('signup_page') }}" class="btn btn-primary" style="flex: 1; padding: 0.75rem; font-weight: 600; text-decoration: none; display: flex; align-items: center; justify-content: center;">Sign Up</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart / Global configuration script -->
+    <script>
+        window.completedTasks = {{ completed_tasks }};
+        window.pendingTasks = {{ pending_tasks }};
+        window.chartLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        window.chartData = [2, 3.5, 4, 2, 5, 1, 3];
+    </script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <!-- Page Specific Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Render calendar for guest
+            var calendarEl = document.getElementById('mini-calendar');
+            if (calendarEl && typeof FullCalendar !== 'undefined') {
+                var calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    headerToolbar: {
+                        left: 'prev,next',
+                        center: 'title',
+                        right: ''
+                    },
+                    events: '/api/calendar',
+                    height: 350,
+                    eventDisplay: 'block',
+                    eventTimeFormat: {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        meridiem: 'short'
+                    },
+                    eventClick: function(info) {
+                        info.jsEvent.preventDefault();
+                        openLoginModal();
+                    }
+                });
+                calendar.render();
+            }
+
+            // Lock and intercept interactions
+            const loginModal = document.getElementById('loginRequiredModal');
+            
+            function openLoginModal() {
+                loginModal.classList.add('active');
+            }
+
+            // Close modal when clicking outside or clicking a close button
+            window.addEventListener('click', (e) => {
+                if (e.target === loginModal) {
+                    loginModal.classList.remove('active');
+                }
+            });
+
+            // Handle guest element interception
+            const guestInteractions = document.querySelectorAll('.protected-action, .landing-dashboard-section button, .landing-dashboard-section .item-left a');
+            guestInteractions.forEach(el => {
+                el.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openLoginModal();
+                });
+            });
+        });
+    </script>
+</body>
+</html>
