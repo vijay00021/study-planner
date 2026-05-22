@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Chart.js Initialization
     const progressCtx = document.getElementById('progressChart');
     if (progressCtx) {
-        new Chart(progressCtx, {
+        window.progressChartInstance = new Chart(progressCtx, {
             type: 'doughnut',
             data: {
                 labels: ['Completed', 'Pending'],
@@ -270,4 +270,117 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // --- Past Dates Restriction ---
+    function getLocalDateString(dateObj) {
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const day = String(dateObj.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    const todayLocalStr = getLocalDateString(new Date());
+    const dateInputs = document.querySelectorAll('input[type="date"]');
+    dateInputs.forEach(input => {
+        input.min = todayLocalStr;
+    });
+
+    const datetimeInputs = document.querySelectorAll('input[type="datetime-local"]');
+    datetimeInputs.forEach(input => {
+        input.min = todayLocalStr + "T00:00";
+    });
+
+    // --- Dynamic Progress Overview Calculations ---
+    function updateProgressOverview() {
+        const selectEl = document.getElementById('progressPeriodSelect');
+        if (!selectEl) return;
+        const period = selectEl.value;
+
+        const today = new Date();
+        const todayStr = getLocalDateString(today);
+
+        // Find Monday and Sunday of the current week (local time)
+        const dayOfWeek = today.getDay();
+        const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+        const monday = new Date(today);
+        monday.setDate(today.getDate() + diffToMonday);
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+
+        const mondayStr = getLocalDateString(monday);
+        const sundayStr = getLocalDateString(sunday);
+
+        let filteredTasks = [];
+        if (period === 'today') {
+            filteredTasks = (window.dashboardTasks || []).filter(t => {
+                if (!t.scheduled_time) return false;
+                return t.scheduled_time.split('T')[0] === todayStr;
+            });
+        } else { // week
+            filteredTasks = (window.dashboardTasks || []).filter(t => {
+                if (!t.scheduled_time) return false;
+                const d = t.scheduled_time.split('T')[0];
+                return d >= mondayStr && d <= sundayStr;
+            });
+        }
+
+        const totalTasks = filteredTasks.length;
+        const completedTasks = filteredTasks.filter(t => t.status === 'Completed').length;
+
+        // Find subjects active in this period (has at least one task in filteredTasks)
+        const activeSubjectIds = new Set(filteredTasks.map(t => t.subject_id).filter(id => id !== null));
+        const totalSubjects = activeSubjectIds.size;
+        let completedSubjects = 0;
+
+        activeSubjectIds.forEach(subId => {
+            // A subject is completed if all its tasks (overall) are completed
+            const subjectTasks = (window.dashboardTasks || []).filter(t => t.subject_id === subId);
+            if (subjectTasks.length > 0 && subjectTasks.every(t => t.status === 'Completed')) {
+                completedSubjects++;
+            }
+        });
+
+        const totalItems = totalTasks + totalSubjects;
+        const completedItems = completedTasks + completedSubjects;
+        const percent = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+
+        // Update UI Text
+        const percentText = document.getElementById('progressPercentText');
+        const periodLabel = document.getElementById('progressPeriodLabel');
+        const feedbackText = document.getElementById('progressFeedbackText');
+
+        if (percentText) {
+            percentText.textContent = percent + '%';
+        }
+        if (periodLabel) {
+            periodLabel.textContent = period === 'today' ? "Today's Progress" : "This Week's Progress";
+        }
+        if (feedbackText) {
+            if (percent === 100) {
+                feedbackText.textContent = 'All done! Fantastic work!';
+            } else if (percent >= 70) {
+                feedbackText.textContent = 'Almost there! Keep it up!';
+            } else if (percent >= 40) {
+                feedbackText.textContent = 'Steady progress! You got this!';
+            } else if (percent > 0) {
+                feedbackText.textContent = 'Off to a good start!';
+            } else {
+                feedbackText.textContent = 'No progress logged yet.';
+            }
+        }
+
+        // Update Progress Doughnut Chart
+        if (window.progressChartInstance) {
+            const pendingItems = totalItems - completedItems;
+            window.progressChartInstance.data.datasets[0].data = [completedItems, pendingItems];
+            window.progressChartInstance.update();
+        }
+    }
+
+    // Set listener and run initial progress update
+    const periodSelect = document.getElementById('progressPeriodSelect');
+    if (periodSelect) {
+        periodSelect.addEventListener('change', updateProgressOverview);
+    }
+    updateProgressOverview();
 });

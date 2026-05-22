@@ -186,6 +186,16 @@
 
     <!-- Custom JS -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('error')) {
+                alert(urlParams.get('error'));
+                const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+            }
+        });
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

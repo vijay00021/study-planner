@@ -7,7 +7,7 @@ import re
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
-from datetime import timedelta
+from datetime import datetime, date, timedelta
 
 # Load environment variables from .env
 load_dotenv()
@@ -192,6 +192,7 @@ def home():
         user_id = session['user_id']
         subjects = Subject.query.filter_by(user_id=user_id).all()
         tasks = Task.query.filter_by(user_id=user_id).order_by(Task.status.desc(), Task.created_at.desc()).limit(10).all()
+        all_tasks = Task.query.filter_by(user_id=user_id).all()
         
         total_subjects = len(subjects)
         pending_tasks = Task.query.filter_by(user_id=user_id, status="Pending").count()
@@ -199,7 +200,7 @@ def home():
         
         study_hours = completed_tasks * 2 # Mock data for UI
 
-        return render_template('index.html', subjects=subjects, tasks=tasks, 
+        return render_template('index.html', subjects=subjects, tasks=tasks, all_tasks=all_tasks,
                                total_subjects=total_subjects, pending_tasks=pending_tasks, 
                                completed_tasks=completed_tasks, study_hours=study_hours, active_page='dashboard')
     else:
@@ -211,25 +212,51 @@ def home():
                 self.deadline = deadline
                 self.priority = priority
                 self.days_left = days_left
+                self.tasks = []
 
         class MockTask:
             def __init__(self, id, name, subject, status, scheduled_time):
                 self.id = id
                 self.task_name = name
                 self.subject = subject
+                self.subject_id = subject.id if subject else None
                 self.status = status
                 self.scheduled_time = scheduled_time
 
-        s1 = MockSubject(1, "Mathematics", "2026-05-25", "High", 3)
-        s2 = MockSubject(2, "Computer Science", "2026-05-28", "Medium", 6)
-        s3 = MockSubject(3, "Physics", "2026-05-24", "High", 2)
-        s4 = MockSubject(4, "Chemistry", "2026-06-02", "Low", 11)
+            @property
+            def formatted_time(self):
+                if not self.scheduled_time:
+                    return ""
+                try:
+                    dt = datetime.strptime(self.scheduled_time, '%Y-%m-%dT%H:%M')
+                    today_date = date.today()
+                    if dt.date() == today_date:
+                        return f"Today, {dt.strftime('%I:%M %p')}"
+                    elif dt.date() == today_date + timedelta(days=1):
+                        return f"Tomorrow, {dt.strftime('%I:%M %p')}"
+                    else:
+                        return dt.strftime('%b %d, %I:%M %p')
+                except Exception:
+                    return self.scheduled_time
 
-        t1 = MockTask(1, "Solve Calculus exercises", s1, "Pending", "10:00 AM")
-        t2 = MockTask(2, "Implement binary search tree", s2, "Completed", "02:30 PM")
-        t3 = MockTask(3, "Review thermodynamics notes", s3, "Pending", "04:00 PM")
-        t4 = MockTask(4, "Lab report preparation", s4, "Pending", "09:00 AM")
-        t5 = MockTask(5, "Prepare presentation slides", s2, "Completed", "01:00 PM")
+        s1 = MockSubject(1, "Mathematics", (date.today() + timedelta(days=3)).strftime('%Y-%m-%d'), "High", 3)
+        s2 = MockSubject(2, "Computer Science", (date.today() + timedelta(days=6)).strftime('%Y-%m-%d'), "Medium", 6)
+        s3 = MockSubject(3, "Physics", (date.today() + timedelta(days=2)).strftime('%Y-%m-%d'), "High", 2)
+        s4 = MockSubject(4, "Chemistry", (date.today() + timedelta(days=11)).strftime('%Y-%m-%d'), "Low", 11)
+
+        today_str = date.today().strftime('%Y-%m-%d')
+        tomorrow_str = (date.today() + timedelta(days=1)).strftime('%Y-%m-%d')
+
+        t1 = MockTask(1, "Solve Calculus exercises", s1, "Pending", f"{today_str}T10:00")
+        t2 = MockTask(2, "Implement binary search tree", s2, "Completed", f"{today_str}T14:30")
+        t3 = MockTask(3, "Review thermodynamics notes", s3, "Pending", f"{today_str}T16:00")
+        t4 = MockTask(4, "Lab report preparation", s4, "Pending", f"{tomorrow_str}T09:00")
+        t5 = MockTask(5, "Prepare presentation slides", s2, "Completed", f"{today_str}T13:00")
+
+        s1.tasks.append(t1)
+        s2.tasks.extend([t2, t5])
+        s3.tasks.append(t3)
+        s4.tasks.append(t4)
 
         subjects = [s1, s2, s3, s4]
         tasks = [t1, t2, t3, t4, t5]
@@ -239,7 +266,7 @@ def home():
         completed_tasks = sum(1 for t in tasks if t.status == "Completed")
         study_hours = 24
 
-        return render_template('landing.html', subjects=subjects, tasks=tasks,
+        return render_template('landing.html', subjects=subjects, tasks=tasks, all_tasks=tasks,
                                total_subjects=total_subjects, pending_tasks=pending_tasks,
                                completed_tasks=completed_tasks, study_hours=study_hours, active_page='home')
 
@@ -255,25 +282,51 @@ def dashboard_page():
             self.deadline = deadline
             self.priority = priority
             self.days_left = days_left
+            self.tasks = []
 
     class MockTask:
         def __init__(self, id, name, subject, status, scheduled_time):
             self.id = id
             self.task_name = name
             self.subject = subject
+            self.subject_id = subject.id if subject else None
             self.status = status
             self.scheduled_time = scheduled_time
 
-    s1 = MockSubject(1, "Mathematics", "2026-05-25", "High", 3)
-    s2 = MockSubject(2, "Computer Science", "2026-05-28", "Medium", 6)
-    s3 = MockSubject(3, "Physics", "2026-05-24", "High", 2)
-    s4 = MockSubject(4, "Chemistry", "2026-06-02", "Low", 11)
+        @property
+        def formatted_time(self):
+            if not self.scheduled_time:
+                return ""
+            try:
+                dt = datetime.strptime(self.scheduled_time, '%Y-%m-%dT%H:%M')
+                today_date = date.today()
+                if dt.date() == today_date:
+                    return f"Today, {dt.strftime('%I:%M %p')}"
+                elif dt.date() == today_date + timedelta(days=1):
+                    return f"Tomorrow, {dt.strftime('%I:%M %p')}"
+                else:
+                    return dt.strftime('%b %d, %I:%M %p')
+            except Exception:
+                return self.scheduled_time
 
-    t1 = MockTask(1, "Solve Calculus exercises", s1, "Pending", "10:00 AM")
-    t2 = MockTask(2, "Implement binary search tree", s2, "Completed", "02:30 PM")
-    t3 = MockTask(3, "Review thermodynamics notes", s3, "Pending", "04:00 PM")
-    t4 = MockTask(4, "Lab report preparation", s4, "Pending", "09:00 AM")
-    t5 = MockTask(5, "Prepare presentation slides", s2, "Completed", "01:00 PM")
+    s1 = MockSubject(1, "Mathematics", (date.today() + timedelta(days=3)).strftime('%Y-%m-%d'), "High", 3)
+    s2 = MockSubject(2, "Computer Science", (date.today() + timedelta(days=6)).strftime('%Y-%m-%d'), "Medium", 6)
+    s3 = MockSubject(3, "Physics", (date.today() + timedelta(days=2)).strftime('%Y-%m-%d'), "High", 2)
+    s4 = MockSubject(4, "Chemistry", (date.today() + timedelta(days=11)).strftime('%Y-%m-%d'), "Low", 11)
+
+    today_str = date.today().strftime('%Y-%m-%d')
+    tomorrow_str = (date.today() + timedelta(days=1)).strftime('%Y-%m-%d')
+
+    t1 = MockTask(1, "Solve Calculus exercises", s1, "Pending", f"{today_str}T10:00")
+    t2 = MockTask(2, "Implement binary search tree", s2, "Completed", f"{today_str}T14:30")
+    t3 = MockTask(3, "Review thermodynamics notes", s3, "Pending", f"{today_str}T16:00")
+    t4 = MockTask(4, "Lab report preparation", s4, "Pending", f"{tomorrow_str}T09:00")
+    t5 = MockTask(5, "Prepare presentation slides", s2, "Completed", f"{today_str}T13:00")
+
+    s1.tasks.append(t1)
+    s2.tasks.extend([t2, t5])
+    s3.tasks.append(t3)
+    s4.tasks.append(t4)
 
     subjects = [s1, s2, s3, s4]
     tasks = [t1, t2, t3, t4, t5]
@@ -283,9 +336,10 @@ def dashboard_page():
     completed_tasks = sum(1 for t in tasks if t.status == "Completed")
     study_hours = 24
 
-    return render_template('index.html', subjects=subjects, tasks=tasks,
+    return render_template('index.html', subjects=subjects, tasks=tasks, all_tasks=tasks,
                            total_subjects=total_subjects, pending_tasks=pending_tasks,
                            completed_tasks=completed_tasks, study_hours=study_hours, active_page='dashboard')
+
 
 @app.route('/subjects')
 @login_required
@@ -475,6 +529,15 @@ def add_subject():
     subject_name = request.form['subject_name']
     deadline = request.form.get('deadline', '')
     priority = request.form.get('priority', 'Medium')
+    
+    if deadline:
+        try:
+            deadline_date = datetime.strptime(deadline, '%Y-%m-%d').date()
+            if deadline_date < date.today():
+                return redirect((request.referrer or url_for('home')) + "?error=Deadline+cannot+be+in+the+past")
+        except ValueError:
+            pass
+
     new_subject = Subject(user_id=session['user_id'], subject_name=subject_name, deadline=deadline, priority=priority)
     db.session.add(new_subject)
     db.session.commit()
@@ -485,8 +548,16 @@ def add_subject():
 def edit_subject(id):
     subject = Subject.query.filter_by(id=id, user_id=session['user_id']).first()
     if subject:
+        deadline = request.form.get('deadline', '')
+        if deadline:
+            try:
+                deadline_date = datetime.strptime(deadline, '%Y-%m-%d').date()
+                if deadline_date < date.today():
+                    return redirect((request.referrer or url_for('subjects_page')) + "?error=Deadline+cannot+be+in+the+past")
+            except ValueError:
+                pass
         subject.subject_name = request.form.get('subject_name', subject.subject_name)
-        subject.deadline = request.form.get('deadline', subject.deadline)
+        subject.deadline = deadline
         subject.priority = request.form.get('priority', subject.priority)
         db.session.commit()
     return redirect(request.referrer or url_for('subjects_page'))
@@ -508,6 +579,20 @@ def add_task():
     subject_id = request.form.get('subject_id')
     if subject_id == '': subject_id = None
     scheduled_time = request.form.get('scheduled_time', '')
+    
+    if scheduled_time:
+        try:
+            scheduled_dt = datetime.strptime(scheduled_time, '%Y-%m-%dT%H:%M')
+            if scheduled_dt.date() < date.today():
+                return redirect((request.referrer or url_for('home')) + "?error=Scheduled+date+cannot+be+in+the+past")
+        except ValueError:
+            try:
+                scheduled_date = datetime.strptime(scheduled_time, '%Y-%m-%d').date()
+                if scheduled_date < date.today():
+                    return redirect((request.referrer or url_for('home')) + "?error=Scheduled+date+cannot+be+in+the+past")
+            except ValueError:
+                pass
+
     description = request.form.get('description', '')
     new_task = Task(user_id=session['user_id'], task_name=task_name, subject_id=subject_id, scheduled_time=scheduled_time, description=description)
     db.session.add(new_task)
@@ -519,10 +604,23 @@ def add_task():
 def edit_task(id):
     task = Task.query.filter_by(id=id, user_id=session['user_id']).first()
     if task:
+        scheduled_time = request.form.get('scheduled_time', '')
+        if scheduled_time:
+            try:
+                scheduled_dt = datetime.strptime(scheduled_time, '%Y-%m-%dT%H:%M')
+                if scheduled_dt.date() < date.today():
+                    return redirect((request.referrer or url_for('home')) + "?error=Scheduled+date+cannot+be+in+the+past")
+            except ValueError:
+                try:
+                    scheduled_date = datetime.strptime(scheduled_time, '%Y-%m-%d').date()
+                    if scheduled_date < date.today():
+                        return redirect((request.referrer or url_for('home')) + "?error=Scheduled+date+cannot+be+in+the+past")
+                except ValueError:
+                    pass
         task.task_name = request.form.get('task_name', task.task_name)
         subject_id = request.form.get('subject_id')
         task.subject_id = subject_id if subject_id != '' else None
-        task.scheduled_time = request.form.get('scheduled_time', '')
+        task.scheduled_time = scheduled_time
         task.description = request.form.get('description', '')
         db.session.commit()
     return redirect(request.referrer or url_for('home'))

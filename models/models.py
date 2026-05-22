@@ -1,5 +1,5 @@
 from extensions import db
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # USER MODEL
 class User(db.Model):
@@ -44,6 +44,24 @@ class Task(db.Model):
     status = db.Column(db.String(50), default="Pending")
     scheduled_time = db.Column(db.String(100), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    @property
+    def formatted_time(self):
+        if not self.scheduled_time:
+            return ""
+        try:
+            # datetime-local is format YYYY-MM-DDTHH:MM
+            dt = datetime.strptime(self.scheduled_time, '%Y-%m-%dT%H:%M')
+            today = datetime.now().date()
+            if dt.date() == today:
+                return f"Today, {dt.strftime('%I:%M %p')}"
+            elif dt.date() == today + timedelta(days=1):
+                return f"Tomorrow, {dt.strftime('%I:%M %p')}"
+            else:
+                return dt.strftime('%b %d, %I:%M %p')
+        except Exception:
+            return self.scheduled_time
+
 
 # STUDY SESSION MODEL
 class StudySession(db.Model):
