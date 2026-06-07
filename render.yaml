@@ -2,5 +2,5 @@ services:
   - type: web
     name: study-dashboard
     env: python
-    buildCommand: "pip install -r requirements.txt && python manage.py migrate"
+    buildCommand: "pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput"
     startCommand: "gunicorn study_planner.wsgi:application"
