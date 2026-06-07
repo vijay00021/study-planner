@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,8 +12,8 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="icon" href="{% static 'favicon.ico' %}">
 </head>
 <body>
     <div class="split-container">
@@ -24,8 +25,8 @@
             </a>
             <div style="pointer-events: auto; display: flex; align-items: center; gap: 2rem;">
                 <a href="/" class="auth-nav-link" style="color: white !important;">Home</a>
-                <a href="{{ url_for('login_page') }}" class="auth-nav-link" style="color: white !important;">Login</a>
-                <a href="{{ url_for('signup_page') }}" class="btn-nav-signup" style="background-color: white !important; color: var(--primary) !important;">Sign Up</a>
+                <a href="{% url 'login_page' %}" class="auth-nav-link" style="color: white !important;">Login</a>
+                <a href="{% url 'signup_page' %}" class="btn-nav-signup" style="background-color: white !important; color: var(--primary) !important;">Sign Up</a>
             </div>
         </header>
 
@@ -40,7 +41,8 @@
                 <h2 style="text-align: center;">Join StudyPlan</h2>
                 <p class="subtitle" style="text-align: center;">Become a study champion today</p>
 
-                <form action="{{ url_for('signup_page') }}" method="POST">
+                <form action="{% url 'signup_page' %}" method="POST">
+                    {% csrf_token %}
                     {% if error %}
                     <div style="background-color: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 0.75rem; border-radius: 6px; font-size: 0.875rem; font-weight: 500; margin-bottom: 1rem; text-align: left;">
                         <i class="fa-solid fa-circle-exclamation" style="margin-right: 0.5rem;"></i>{{ error }}
@@ -51,7 +53,7 @@
                         <label class="form-label">Full Name</label>
                         <div class="input-with-icon">
                             <i class="fa-solid fa-user"></i>
-                            <input type="text" name="username" class="form-control" required placeholder="Your full name" value="{{ form_data.username if form_data else '' }}">
+                            <input type="text" name="username" class="form-control" required placeholder="Your full name" value="{{ form_data.username|default:'' }}">
                         </div>
                     </div>
                     
@@ -59,7 +61,7 @@
                         <label class="form-label">Email Address</label>
                         <div class="input-with-icon">
                             <i class="fa-solid fa-envelope"></i>
-                            <input type="email" name="email" class="form-control" required placeholder="you@example.com" value="{{ form_data.email if form_data else '' }}">
+                            <input type="email" name="email" class="form-control" required placeholder="you@example.com" value="{{ form_data.email|default:'' }}">
                         </div>
                     </div>
                     
@@ -95,7 +97,7 @@
                 </form>
 
                 <div style="margin-top: 2rem; font-size: 0.875rem; text-align: center; color: var(--text-muted);">
-                    Already have an account? <a href="{{ url_for('login_page') }}" style="color: var(--primary); font-weight: 600;">Sign in</a>
+                    Already have an account? <a href="{% url 'login_page' %}" style="color: var(--primary); font-weight: 600;">Sign in</a>
                 </div>
             </div>
         </div>
@@ -142,6 +144,6 @@
             </div>
         </div>
     </div>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{% static 'script.js' %}"></script>
 </body>
 </html>

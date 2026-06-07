@@ -5,7 +5,7 @@
 {% block content %}
 <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
     <div>
-        <h1 class="page-title">Welcome back, {{ current_user.username if current_user else 'Guest' }}! 👋</h1>
+        <h1 class="page-title">Welcome back, {% if user.is_authenticated %}{{ user.username }}{% else %}Guest{% endif %}! 👋</h1>
         <p class="page-subtitle">Stay consistent and achieve your goals.</p>
     </div>
     <button class="btn btn-primary" data-modal-target="#addSubjectModal">
@@ -16,35 +16,43 @@
 <!-- STAT CARDS -->
 <div class="grid-cards" style="grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
     <div class="stat-card">
-        <div class="stat-icon purple"><i class="fa-solid fa-book-open"></i></div>
-        <div class="stat-info">
-            <div class="label">Total Subjects</div>
-            <div class="value">{{ total_subjects }}</div>
-            <div class="subtext" style="color: var(--primary); font-size: 0.75rem; margin-top: 0.25rem;">Active subjects</div>
+        <div class="stat-card-body" style="display: flex; align-items: center; gap: 1rem; padding: 1.5rem;">
+            <div class="stat-icon purple"><i class="fa-solid fa-book-open"></i></div>
+            <div class="stat-info">
+                <div class="label">Total Subjects</div>
+                <div class="value">{{ total_subjects }}</div>
+                <div class="subtext" style="color: var(--primary); font-size: 0.75rem; margin-top: 0.25rem;">Active subjects</div>
+            </div>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon green"><i class="fa-solid fa-clipboard-check"></i></div>
-        <div class="stat-info">
-            <div class="label">Pending Tasks</div>
-            <div class="value">{{ pending_tasks }}</div>
-            <div class="subtext" style="color: var(--success); font-size: 0.75rem; margin-top: 0.25rem;">Tasks to complete</div>
+        <div class="stat-card-body" style="display: flex; align-items: center; gap: 1rem; padding: 1.5rem;">
+            <div class="stat-icon green"><i class="fa-solid fa-clipboard-check"></i></div>
+            <div class="stat-info">
+                <div class="label">Pending Tasks</div>
+                <div class="value">{{ pending_tasks }}</div>
+                <div class="subtext" style="color: var(--success); font-size: 0.75rem; margin-top: 0.25rem;">Tasks to complete</div>
+            </div>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon blue" style="background-color: rgba(59, 130, 246, 0.1); color: #3b82f6;"><i class="fa-regular fa-circle-check"></i></div>
-        <div class="stat-info">
-            <div class="label">Completed Tasks</div>
-            <div class="value">{{ completed_tasks }}</div>
-            <div class="subtext" style="color: #3b82f6; font-size: 0.75rem; margin-top: 0.25rem;">Tasks completed</div>
+        <div class="stat-card-body" style="display: flex; align-items: center; gap: 1rem; padding: 1.5rem;">
+            <div class="stat-icon blue" style="background-color: rgba(59, 130, 246, 0.1); color: #3b82f6;"><i class="fa-regular fa-circle-check"></i></div>
+            <div class="stat-info">
+                <div class="label">Completed Tasks</div>
+                <div class="value">{{ completed_tasks }}</div>
+                <div class="subtext" style="color: #3b82f6; font-size: 0.75rem; margin-top: 0.25rem;">Tasks completed</div>
+            </div>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon orange"><i class="fa-solid fa-arrow-trend-up"></i></div>
-        <div class="stat-info">
-            <div class="label">Study Hours</div>
-            <div class="value">{{ study_hours }}</div>
-            <div class="subtext" style="color: var(--warning); font-size: 0.75rem; margin-top: 0.25rem;">This week</div>
+        <div class="stat-card-body" style="display: flex; align-items: center; gap: 1rem; padding: 1.5rem;">
+            <div class="stat-icon orange"><i class="fa-solid fa-arrow-trend-up"></i></div>
+            <div class="stat-info">
+                <div class="label">Study Hours</div>
+                <div class="value">{{ study_hours }}</div>
+                <div class="subtext" style="color: var(--warning); font-size: 0.75rem; margin-top: 0.25rem;">This week</div>
+            </div>
         </div>
     </div>
 </div>
@@ -52,20 +60,20 @@
 <div class="dashboard-main-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
     <!-- COL 1: Today's Tasks -->
     <div class="card" style="margin-bottom: 0;">
-        <div class="card-header" style="border-bottom: none; padding-bottom: 0.5rem;">
+        <div class="card-header" style="border-bottom: none; padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
             <span>Today's Tasks</span>
-            <a href="{{ url_for('tasks_page') }}" style="color: var(--primary); font-size: 0.875rem; font-weight: 500;">View all</a>
+            <a href="{% url 'tasks_page' %}" style="color: var(--primary); font-size: 0.875rem; font-weight: 500;">View all</a>
         </div>
         <div class="card-body">
             <div class="item-list">
                 {% for task in tasks %}
                 <div class="item" style="border: none; padding: 0.75rem 0; border-bottom: 1px solid var(--surface-hover); border-radius: 0;">
                     <div class="item-left" style="align-items: flex-start; gap: 0.75rem;">
-                        <a href="{{ url_for('complete_task', id=task.id) }}" style="color: {{ 'var(--success)' if task.status == 'Completed' else 'var(--border)' }}; font-size: 1.25rem; margin-top: 0.1rem;">
-                            <i class="{{ 'fa-solid fa-square-check' if task.status == 'Completed' else 'fa-regular fa-square' }}" style="border-radius: 4px;"></i>
+                        <a href="{% url 'complete_task' task.id %}" style="color: {% if task.status == 'Completed' %}var(--success){% else %}var(--border){% endif %}; font-size: 1.25rem; margin-top: 0.1rem;">
+                            <i class="{% if task.status == 'Completed' %}fa-solid fa-square-check{% else %}fa-regular fa-square{% endif %}" style="border-radius: 4px;"></i>
                         </a>
                         <div>
-                            <div class="item-title" style="font-weight: 600; font-size: 0.875rem; text-decoration: {{ 'line-through' if task.status == 'Completed' else 'none' }}; color: {{ 'var(--text-muted)' if task.status == 'Completed' else 'inherit' }};">
+                            <div class="item-title" style="font-weight: 600; font-size: 0.875rem; text-decoration: {% if task.status == 'Completed' %}line-through{% else %}none{% endif %}; color: {% if task.status == 'Completed' %}var(--text-muted){% else %}inherit{% endif %};">
                                 {{ task.task_name }}
                             </div>
                             <div class="item-meta" style="margin-top: 0.25rem;">
@@ -85,7 +93,7 @@
                     </div>
                     {% endif %}
                 </div>
-                {% else %}
+                {% empty %}
                 <p class="text-muted text-center" style="padding: 1rem 0;">No tasks for today.</p>
                 {% endfor %}
             </div>
@@ -97,7 +105,7 @@
 
     <!-- COL 2: Progress Overview -->
     <div class="card" style="margin-bottom: 0;">
-        <div class="card-header" style="border-bottom: none; padding-bottom: 0.5rem;">
+        <div class="card-header" style="border-bottom: none; padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
             <span>Progress Overview</span>
             <select id="progressPeriodSelect" class="progress-select">
                 <option value="today">Today</option>
@@ -122,9 +130,9 @@
 
     <!-- COL 3: Subjects -->
     <div class="card" style="margin-bottom: 0;">
-        <div class="card-header" style="border-bottom: none; padding-bottom: 0.5rem;">
+        <div class="card-header" style="border-bottom: none; padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
             <span>Subjects</span>
-            <a href="{{ url_for('subjects_page') }}" style="color: var(--primary); font-size: 0.875rem; font-weight: 500;">View all</a>
+            <a href="{% url 'subjects_page' %}" style="color: var(--primary); font-size: 0.875rem; font-weight: 500;">View all</a>
         </div>
         <div class="card-body">
             <div class="item-list">
@@ -136,20 +144,17 @@
                         </div>
                         <div style="flex: 1;">
                             <div class="item-title" style="font-size: 0.875rem; font-weight: 600;">{{ subject.subject_name }}</div>
-                            <div class="item-meta" style="font-size: 0.7rem; margin-top: 0.25rem;">Deadline: {{ subject.deadline or 'N/A' }}</div>
+                            <div class="item-meta" style="font-size: 0.7rem; margin-top: 0.25rem;">Deadline: {{ subject.deadline|default:'N/A' }}</div>
                         </div>
                     </div>
-                    {% set total_tasks = subject.tasks|length %}
-                    {% set completed_tasks_count = subject.tasks|selectattr('status', 'equalto', 'Completed')|list|length %}
-                    {% set percent = (completed_tasks_count / total_tasks * 100)|round|int if total_tasks > 0 else 0 %}
                     <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; width: 60px;">
-                        <span style="font-size: 0.75rem; font-weight: 600;">{{ percent }}%</span>
+                        <span style="font-size: 0.75rem; font-weight: 600;">{{ subject.completion_percentage }}%</span>
                         <div style="width: 100%; height: 6px; background-color: var(--surface-hover); border-radius: 3px; overflow: hidden;">
-                            <div style="height: 100%; width: {{ percent }}%; background-color: var(--primary); border-radius: 3px;"></div>
+                            <div style="height: 100%; width: {{ subject.completion_percentage }}%; background-color: var(--primary); border-radius: 3px;"></div>
                         </div>
                     </div>
                 </div>
-                {% else %}
+                {% empty %}
                 <p class="text-muted text-center" style="font-size: 0.875rem;">No subjects yet.</p>
                 {% endfor %}
             </div>
@@ -158,13 +163,14 @@
 
     <!-- ROW 3: Upcoming Deadlines (Span 2) -->
     <div class="card" style="grid-column: span 2;">
-        <div class="card-header" style="border-bottom: none; padding-bottom: 0.5rem;">
+        <div class="card-header" style="border-bottom: none; padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
             <span>Upcoming Deadlines</span>
             <a href="#" style="color: var(--primary); font-size: 0.875rem; font-weight: 500;">View all</a>
         </div>
         <div class="card-body">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                {% for subject in subjects if subject.deadline and subject.days_left is not none and 0 <= subject.days_left <= 7 %}
+                {% for subject in subjects %}
+                {% if subject.is_due_soon %}
                 <div style="border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem; display: flex; flex-direction: column; gap: 1rem;">
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                         <div class="stat-icon orange" style="width: 36px; height: 36px; font-size: 1rem; border-radius: 8px;"><i class="fa-regular fa-calendar"></i></div>
@@ -183,7 +189,8 @@
                         {% endif %}
                     </div>
                 </div>
-                {% else %}
+                {% endif %}
+                {% empty %}
                 <p class="text-muted text-center" style="font-size: 0.875rem; width: 100%;">No upcoming deadlines.</p>
                 {% endfor %}
             </div>
@@ -205,7 +212,8 @@
             <h3>Add New Task</h3>
             <i class="fa-solid fa-xmark close-btn"></i>
         </div>
-        <form action="{{ url_for('add_task') }}" method="POST">
+        <form action="{% url 'add_task' %}" method="POST">
+            {% csrf_token %}
             <div class="form-group">
                 <label class="form-label">Task Name</label>
                 <input type="text" name="task_name" class="form-control" required placeholder="What do you need to do?">
@@ -235,7 +243,8 @@
             <h3>Add New Subject</h3>
             <i class="fa-solid fa-xmark close-btn"></i>
         </div>
-        <form action="{{ url_for('add_subject') }}" method="POST">
+        <form action="{% url 'add_subject' %}" method="POST">
+            {% csrf_token %}
             <div class="form-group">
                 <label class="form-label">Subject Name</label>
                 <input type="text" name="subject_name" class="form-control" required placeholder="e.g. Mathematics">
@@ -266,20 +275,20 @@
         {% for t in all_tasks %}
         {
             id: {{ t.id }},
-            name: "{{ t.task_name|escape }}",
+            name: "{{ t.task_name|escapejs }}",
             status: "{{ t.status }}",
-            scheduled_time: "{{ t.scheduled_time or '' }}",
-            subject_id: {{ t.subject_id or 'null' }}
-        }{% if not loop.last %},{% endif %}
+            scheduled_time: "{{ t.scheduled_time|default:'' }}",
+            subject_id: {{ t.subject_id|default:'null' }}
+        }{% if not forloop.last %},{% endif %}
         {% endfor %}
     ];
     window.dashboardSubjects = [
         {% for s in subjects %}
         {
             id: {{ s.id }},
-            name: "{{ s.subject_name|escape }}",
-            deadline: "{{ s.deadline or '' }}"
-        }{% if not loop.last %},{% endif %}
+            name: "{{ s.subject_name|escapejs }}",
+            deadline: "{{ s.deadline|default:'' }}"
+        }{% if not forloop.last %},{% endif %}
         {% endfor %}
     ];
 

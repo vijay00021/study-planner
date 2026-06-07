@@ -1,6 +1,6 @@
-Flask
-Flask-SQLAlchemy
-Werkzeug
+django
+django-environ
+dj-database-url
 gunicorn
 python-dotenv
 psycopg2-binary

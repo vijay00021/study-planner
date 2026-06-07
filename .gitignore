@@ -10,6 +10,8 @@ venv/
 
 # SQLite database
 *.db
+db.sqlite3
+*.sqlite3
 instance/
 
 # VS Code settings

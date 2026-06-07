@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,8 +12,8 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="icon" href="{% static 'favicon.ico' %}">
 </head>
 <body>
     <div class="split-container">
@@ -24,8 +25,8 @@
             </a>
             <div style="pointer-events: auto; display: flex; align-items: center; gap: 2rem;">
                 <a href="/" class="auth-nav-link" style="color: white !important;">Home</a>
-                <a href="{{ url_for('login_page') }}" class="auth-nav-link active" style="color: white !important;">Login</a>
-                <a href="{{ url_for('signup_page') }}" class="btn-nav-signup" style="background-color: white !important; color: var(--primary) !important;">Sign Up</a>
+                <a href="{% url 'login_page' %}" class="auth-nav-link active" style="color: white !important;">Login</a>
+                <a href="{% url 'signup_page' %}" class="btn-nav-signup" style="background-color: white !important; color: var(--primary) !important;">Sign Up</a>
             </div>
         </header>
 
@@ -73,19 +74,20 @@
                 </div>
                 {% endif %}
 
-                <form action="{{ url_for('login_page') }}" method="POST">
+                <form action="{% url 'login_page' %}" method="POST">
+                    {% csrf_token %}
                     <div class="form-group">
                         <label class="form-label">Email Address</label>
                         <div class="input-with-icon">
                             <i class="fa-solid fa-envelope"></i>
-                            <input type="email" name="email" class="form-control" required placeholder="name@example.com" value="{{ email if email else '' }}">
+                            <input type="email" name="email" class="form-control" required placeholder="name@example.com" value="{{ email }}">
                         </div>
                     </div>
                     
                     <div class="form-group">
                         <label class="form-label" style="display: flex; justify-content: space-between;">
                             Password
-                            <a href="{{ url_for('forgot_password') }}" style="color: var(--primary); font-size: 0.75rem; font-weight: 500;">Forgot Password?</a>
+                            <a href="{% url 'forgot_password' %}" style="color: var(--primary); font-size: 0.75rem; font-weight: 500;">Forgot Password?</a>
                         </label>
                         <div class="password-container input-with-icon">
                             <i class="fa-solid fa-lock"></i>
@@ -108,11 +110,11 @@
                 </form>
 
                 <div style="margin-top: 2.5rem; font-size: 0.875rem; text-align: center; color: var(--text-muted);">
-                    Don't have an account? <a href="{{ url_for('signup_page') }}" style="color: var(--primary); font-weight: 600;">Create one</a>
+                    Don't have an account? <a href="{% url 'signup_page' %}" style="color: var(--primary); font-weight: 600;">Create one</a>
                 </div>
             </div>
         </div>
     </div>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{% static 'script.js' %}"></script>
 </body>
 </html>

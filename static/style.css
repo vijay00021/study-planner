@@ -696,7 +696,7 @@ ul { list-style: none; }
     align-items: center;
     width: 100%;
 }
-.input-with-icon i {
+.input-with-icon > i {
     position: absolute;
     left: 1rem;
     color: var(--text-muted);

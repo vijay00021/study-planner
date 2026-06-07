@@ -19,11 +19,11 @@
             {% for task in tasks %}
             <div class="item">
                 <div class="item-left">
-                    <a href="{{ url_for('complete_task', id=task.id) }}" style="color: {{ 'var(--success)' if task.status == 'Completed' else 'var(--border)' }}; font-size: 1.25rem;">
-                        <i class="{{ 'fa-solid fa-circle-check' if task.status == 'Completed' else 'fa-regular fa-circle' }}"></i>
+                    <a href="{% url 'complete_task' task.id %}" style="color: {% if task.status == 'Completed' %}var(--success){% else %}var(--border){% endif %}; font-size: 1.25rem;">
+                        <i class="{% if task.status == 'Completed' %}fa-solid fa-circle-check{% else %}fa-regular fa-circle{% endif %}"></i>
                     </a>
                     <div>
-                        <div class="item-title" style="text-decoration: {{ 'line-through' if task.status == 'Completed' else 'none' }}; color: {{ 'var(--text-muted)' if task.status == 'Completed' else 'inherit' }};">
+                        <div class="item-title" style="text-decoration: {% if task.status == 'Completed' %}line-through{% else %}none{% endif %}; color: {% if task.status == 'Completed' %}var(--text-muted){% else %}inherit{% endif %};">
                             {{ task.task_name }}
                         </div>
                         <div class="item-meta">
@@ -41,15 +41,15 @@
                     <button class="btn btn-outline edit-task-btn" style="border: none; padding: 0.25rem; margin-left: 1rem;" 
                         data-id="{{ task.id }}" 
                         data-name="{{ task.task_name }}" 
-                        data-desc="{{ task.description or '' }}" 
-                        data-subject="{{ task.subject_id or '' }}" 
-                        data-time="{{ task.scheduled_time or '' }}">
+                        data-desc="{{ task.description|default:'' }}" 
+                        data-subject="{{ task.subject_id|default:'' }}" 
+                        data-time="{{ task.scheduled_time|default:'' }}">
                         <i class="fa-solid fa-pen"></i>
                     </button>
-                    <a href="#" class="text-danger delete-confirm" data-delete-url="{{ url_for('delete_task', id=task.id) }}" style="margin-left: 0.5rem;"><i class="fa-solid fa-trash"></i></a>
+                    <a href="#" class="text-danger delete-confirm" data-delete-url="{% url 'delete_task' task.id %}" style="margin-left: 0.5rem;"><i class="fa-solid fa-trash"></i></a>
                 </div>
             </div>
-            {% else %}
+            {% empty %}
             <p class="text-muted text-center" style="padding: 2rem 0;">No tasks found. Enjoy your free time!</p>
             {% endfor %}
         </div>
@@ -63,7 +63,8 @@
             <h3>Add New Task</h3>
             <i class="fa-solid fa-xmark close-btn"></i>
         </div>
-        <form action="{{ url_for('add_task') }}" method="POST">
+        <form action="{% url 'add_task' %}" method="POST">
+            {% csrf_token %}
             <div class="form-group">
                 <label class="form-label">Task Name</label>
                 <input type="text" name="task_name" class="form-control" required placeholder="What do you need to do?">
@@ -98,6 +99,7 @@
             <i class="fa-solid fa-xmark close-btn"></i>
         </div>
         <form id="editTaskForm" action="" method="POST">
+            {% csrf_token %}
             <div class="form-group">
                 <label class="form-label">Task Name</label>
                 <input type="text" id="edit_task_name" name="task_name" class="form-control" required>

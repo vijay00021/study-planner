@@ -59,7 +59,8 @@
         </div>
         
         <!-- Log Form -->
-        <form id="log-session-form" action="{{ url_for('log_session') }}" method="POST" style="margin-top: 2.5rem; display: none; background: rgba(16, 185, 129, 0.1); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid rgba(16, 185, 129, 0.2);">
+        <form id="log-session-form" action="{% url 'log_session' %}" method="POST" style="margin-top: 2.5rem; display: none; background: rgba(16, 185, 129, 0.1); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid rgba(16, 185, 129, 0.2);">
+            {% csrf_token %}
             <div style="font-size: 2.5rem; color: var(--success); margin-bottom: 0.5rem;"><i class="fa-solid fa-check-circle"></i></div>
             <p style="margin-bottom: 1rem; color: var(--text-main); font-weight: 600; font-size: 1.1rem;">Time's up! Great job.</p>
             <p id="log-text" style="margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.875rem;">Log this session to track your progress.</p>
@@ -112,14 +113,12 @@
         customMinutesInput.value = (initialTime / 60);
 
         function updateDisplay() {
-            // Failsafe bounds checking
             if (timeLeft < 0) timeLeft = 0;
             
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
             display.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             
-            // Update Ring
             const percent = (timeLeft / initialTime) * 100;
             setProgress(percent);
             
@@ -127,7 +126,6 @@
         }
         
         function updateUIState() {
-            // Update mode buttons
             modeFocus.className = currentMode === 'focus' ? 'btn btn-primary' : 'btn btn-outline';
             modeShort.className = currentMode === 'short' ? 'btn btn-primary' : 'btn btn-outline';
             modeLong.className = currentMode === 'long' ? 'btn btn-primary' : 'btn btn-outline';
@@ -164,7 +162,6 @@
             timeLeft = initialTime;
             customDuration = mins;
             
-            // Save to storage
             localStorage.setItem('timerMode', mode);
             localStorage.setItem('timerInitialTime', initialTime.toString());
             localStorage.setItem('timerTimeLeft', timeLeft.toString());
@@ -201,7 +198,6 @@
         
         startBtn.addEventListener('click', () => {
             if (!isRunning) {
-                // Failsafe: if timer is at 0 and they hit start, reset it to current input
                 if (timeLeft <= 0) {
                     let mins = parseInt(customMinutesInput.value) || 25;
                     initialTime = mins * 60;
@@ -214,7 +210,6 @@
                 isRunning = true;
                 let endTime = Date.now() + (timeLeft * 1000);
                 
-                // Save state globally
                 localStorage.setItem('timerRunning', 'true');
                 localStorage.setItem('timerEndTime', endTime.toString());
                 localStorage.setItem('timerMode', currentMode);
@@ -249,7 +244,6 @@
             updateDisplay();
         });
 
-        // Listen for Global Timer Events from script.js
         window.addEventListener('globalTimerTick', () => {
             if (isRunning) {
                 timeLeft = parseInt(localStorage.getItem('timerTimeLeft'));
@@ -275,11 +269,9 @@
             }
         });
 
-        // Init Run
         updateUIState();
         updateDisplay();
         
-        // Check if finished while page was loading
         if (timeLeft <= 0 && !isRunning && localStorage.getItem('timerTimeLeft') === '0') {
             logDurationInput.value = customDuration;
             logForm.style.display = 'block';
